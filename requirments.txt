@@ -1,0 +1,4 @@
+Liste des librairies nécessaires:
+
+Pandas
+Numpy
