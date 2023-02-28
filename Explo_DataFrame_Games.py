@@ -33,3 +33,4 @@ print(df['Platform'].unique())
 print(df['Year'].unique())
 print(df['Genre'].unique())
 
+
