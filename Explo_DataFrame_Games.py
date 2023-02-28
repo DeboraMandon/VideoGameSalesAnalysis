@@ -34,3 +34,39 @@ print(df['Year'].unique())
 print(df['Genre'].unique())
 
 
+# RELATION ENTRE LES VALEURS
+########## PART D
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+#PLATEFORMES
+
+platform_count=df.groupby('Platform').agg('count')
+platform_count.reset_index(inplace=True)
+platform_count.drop(['Year', 'Genre','Publisher', 'NA_Sales', 'EU_Sales', 'JP_Sales', 'Other_Sales', 'Global_Sales'], axis=1, inplace=True)
+platform_count=platform_count.rename(columns={'Platform':'Platform','Name':'Count'})
+print(platform_count)
+
+sns.set_theme(style="darkgrid")
+g=sns.catplot(data=platform_count, kind="bar",x="Platform", y="Count", palette="dark", alpha=.6, height=10)
+g.despine(left=True)
+g.set_axis_labels("Platform", "Count")
+g.tick_params(axis='x', rotation=70)
+plt.title("Répartition des plateformes");
+
+
+#GENRES
+
+genre_count=df.groupby('Genre').agg('count')
+genre_count.reset_index(inplace=True)
+genre_count.drop(['Year', 'Platform','Publisher', 'NA_Sales', 'EU_Sales', 'JP_Sales', 'Other_Sales', 'Global_Sales'], axis=1, inplace=True)
+genre_count=genre_count.rename(columns={'Genre':'Genre','Name':'Count'})
+print(genre_count)
+
+sns.set_theme(style="darkgrid")
+g=sns.catplot(data=genre_count, kind="bar",x="Genre", y="Count", palette="dark", alpha=.6, height=10)
+g.despine(left=True)
+g.set_axis_labels("Genre", "Count")
+g.tick_params(axis='x', rotation=70)
+plt.title("Répartition des Genres");
