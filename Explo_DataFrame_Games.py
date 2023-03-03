@@ -54,6 +54,13 @@ g.set_axis_labels("Platform", "Count")
 g.set_xticklabels(rotation=70)
 plt.title("Répartition des plateformes");
 
+#PLATEFORMES
+
+plt.figure(figsize=(20,8))
+plt.title('Effectif de chaque Plateformes de ventes')
+
+sns.countplot(x = 'Platform', hue = 'cat_Global_Sales', data = df);
+
 
 #GENRES
 
@@ -71,6 +78,40 @@ g.set_xticklabels(rotation=70)
 plt.title("Répartition des Genres");
 
 
+plt.figure(figsize=(20,8))
+plt.title('Effectif de chaque Genre de ventes')
+
+sns.countplot(x = 'Genre', hue = 'cat_Global_Sales', data = df);
+
+
+# AGGREGATION POUR ETUDE DES VENTES EN FONCTION DU GENRE
+
+agg_genre=df.groupby(['Genre'], as_index=False).agg({'Global_Sales':'sum', 'NA_Sales':'sum', 'EU_Sales':'sum', 'JP_Sales':'sum', 'Other_Sales':'sum'})
+agg_genre=agg_genre.sort_values(by='Genre', ascending=True)
+
+plt.figure()
+plt.title('Ventes par Genre', fontsize=18)
+sns.barplot(x='Genre', y='Global_Sales', order=agg_genre['Genre'].values, data=agg_genre);
+plt.xticks(rotation=70);
+
+vente_best=0
+for i in agg_genre['Genre'].iloc[-1:]:
+    sale=agg_genre[agg_genre['Genre']==i]['Global_Sales'].sum()
+    vente_best += sale
+
+vente_worst=0
+for i in agg_genre['Genre'].iloc[:1]:
+    sale=agg_genre[agg_genre['Genre']==i]['Global_Sales'].sum()
+    vente_worst += sale
+
+vente_best_genre=vente_best/agg_genre.Global_Sales.sum()*100
+vente_worst_genre=vente_worst/agg_genre.Global_Sales.sum()*100
+
+
+print('Pourcentage des ventes du Genre qui se vend le plus:',round(vente_best_genre,2),'%')
+print('Pourcentage des ventes du Genre qui se vend le plus:',round(vente_worst_genre,2),'%')
+
+
 fig,ax=plt.subplots(4,3,figsize=(45,25))
 
 coordonnees = [(0,0),(0,1),(0,2),(1,0),(1,1),(1,2),(2,0),(2,1),(2,2),(3,0),(3,1),(3,2)]
@@ -81,6 +122,7 @@ for i, j in zip(coordonnees, df['Genre'].unique()):
                              xdate=True,
                              ls='-')
     ax[i[0], i[1]].set_title(str(j), fontsize=30);
+
 
 
 # ETUDE DES VARIABLES NUMERIQUES
