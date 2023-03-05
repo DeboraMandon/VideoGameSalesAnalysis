@@ -127,16 +127,6 @@ for i in var_num:
 df['Year']=pd.to_datetime(df['Year'], format='%Y')
 
 
-
-
-#PLATEFORMES
-
-plt.figure(figsize=(20,8))
-plt.title('Effectif de chaque Plateformes de ventes')
-
-sns.countplot(x = 'Platform', hue = 'cat_Global_Sales', data = df);
-
-
 sales_per_year=df.groupby('Year', as_index=False).agg({'NA_Sales':sum, 'EU_Sales':sum, 'JP_Sales':sum, 'Other_Sales':sum,'Global_Sales':sum})
 
 
@@ -170,6 +160,22 @@ plt.plot_date(x=sales_per_year['Year'].values,
 plt.legend(loc='best')
 plt.title('Evolution des ventes')
 plt.show();
+
+
+#PLATEFORMES
+
+plt.figure(figsize=(20,8))
+plt.title('Effectif de chaque Plateformes de ventes')
+
+sns.countplot(x = 'Platform', hue = 'cat_Global_Sales', data = df);
+
+
+#GENRE
+
+plt.figure(figsize=(20,8))
+plt.title('Effectif de chaque Genre de ventes')
+
+sns.countplot(x = 'Genre', hue = 'cat_Global_Sales', data = df);
 
 
 # ANALYSE DE LA TENDANCE DES VENTES GLOBALES
