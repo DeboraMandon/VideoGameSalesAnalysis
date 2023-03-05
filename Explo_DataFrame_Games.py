@@ -54,12 +54,6 @@ g.set_axis_labels("Platform", "Count")
 g.set_xticklabels(rotation=70)
 plt.title("Répartition des plateformes");
 
-#PLATEFORMES
-
-plt.figure(figsize=(20,8))
-plt.title('Effectif de chaque Plateformes de ventes')
-
-sns.countplot(x = 'Platform', hue = 'cat_Global_Sales', data = df);
 
 
 #GENRES
@@ -131,6 +125,17 @@ for i in var_num:
     df['cat_'+i]=pd.qcut(df[i], q=[0,.25,.5,.75,1.], duplicates='drop')
 
 df['Year']=pd.to_datetime(df['Year'], format='%Y')
+
+
+
+
+#PLATEFORMES
+
+plt.figure(figsize=(20,8))
+plt.title('Effectif de chaque Plateformes de ventes')
+
+sns.countplot(x = 'Platform', hue = 'cat_Global_Sales', data = df);
+
 
 sales_per_year=df.groupby('Year', as_index=False).agg({'NA_Sales':sum, 'EU_Sales':sum, 'JP_Sales':sum, 'Other_Sales':sum,'Global_Sales':sum})
 
