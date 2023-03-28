@@ -1,6 +1,11 @@
 Liste des librairies nécessaires:
 
 Pandas
+
 Numpy
 Seaborn
 Matplotlib
+
+Selenium
+
+ScikitLearn
