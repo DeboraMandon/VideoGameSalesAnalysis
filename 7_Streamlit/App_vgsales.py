@@ -58,13 +58,13 @@ if page == pages[0]:
     st.dataframe(df.head(10))
     st.write("Shape du Dataframe :",df.shape)
     st.write("Nom des colonnes :",df.columns)
-    st.write("Info Datafram :",df.describe())
+    st.write("Description du Dataframe :",df.describe())
 
 
 if page == pages[1]:
     
     graphs=["Evolution des ventes par Région", "Répartition des Ventes par Région", 
-            "Répartition des 10 catégories les plus représentées par cariables catégorielles", "Distribution des variables numériques",
+            "Répartition des 10 catégories les plus représentées par variables catégorielles", "Distribution des variables numériques",
             "Heatmap du Dataframe"]
     
     graph=st.selectbox("Choisissez votre visualisation", graphs)
@@ -90,9 +90,8 @@ if page == pages[1]:
         st.pyplot(fig1)
     
     if graph == graphs[1]:
-        choices_num =st.multiselect("Choisissez les variables numériques à étudier", df[['NA_Sales','EU_Sales','JP_Sales','Other_Sales']].columns)
         fig2=plt.figure(figsize=(10,6))
-        valeurs=df[choices_num].sum()
+        valeurs=df[['NA_Sales','EU_Sales','JP_Sales','Other_Sales']].sum()
         plt.title('Répartition des Ventes par Région')
         plt.pie(x=valeurs.values,labels=valeurs.index,autopct=lambda x: f'{str(round(x, 2))}%');
         st.pyplot(fig2)
