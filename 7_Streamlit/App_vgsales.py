@@ -36,7 +36,7 @@ pages=['Présentation du projet', 'Dataframe', 'Data Visualisation', 'Modélisat
 models= ["Regression Linéaire", "KNN", "Random forest", 'Lasso', 'LinearSVR', 'LassoLarsCV']
 page=st.sidebar.radio("Choisissez votre page", pages)
 
-        
+
 if page == pages[0]:
     st.title("Video Games Sales Analysis")
     st.header("Machine Learning Project")
@@ -113,24 +113,24 @@ if page == pages[1]:
     st.write("Shape du nouveau Dataframe.v2 : ", df_clean.shape)
     st.write("Nom des colonnes :",df_clean.columns)
     st.write("Description du Dataframe.v2 :",df_clean.describe())    
-    
+
 if page == pages[2]:
-    st.header("Data Visualisation") 
+    st.header("Data Visualisation")
     st.subheader("Pour visualiser les données à l'aide de graphiques, choisissez un type de visualisation puis les variables à explorer."
-                 )        
+                 )
     graphs=["Evolution des ventes par Région", "Répartition des Ventes par Région", 
             "Répartition des 10 catégories les plus représentées par variables catégorielles", "Distribution des variables numériques",
             "Heatmap des variables numériques du Dataframe après PreProcessing"]
-    
+
     graph=st.radio("Choisissez votre visualisation", graphs)
-        
+
     if graph == graphs[0]:    
         for i in df.select_dtypes(include=['int64', 'float64']):
             df[f'cat_{i}'] = pd.qcut(df[i], q=[0,.25,.5,.75,1.], duplicates='drop')
         df['Year']=pd.to_datetime(df['Year'], format='%Y')
         sales_per_year=df.groupby('Year', as_index=False).agg({'NA_Sales':sum, 'EU_Sales':sum, 'JP_Sales':sum, 'Other_Sales':sum,'Global_Sales':sum})
         choices_num =st.multiselect("Choisissez les variables numériques à étudier", sales_per_year.select_dtypes(include=['int64', 'float64']).columns)
-        
+
         fig1=plt.figure(figsize=(10,5))
         sns.set(style="whitegrid")
         plt.plot_date(x=sales_per_year['Year'].values,
@@ -143,29 +143,29 @@ if page == pages[2]:
         plt.ylabel('Ventes en millions')
         plt.title('Evolution des ventes par Région')
         st.pyplot(fig1)
-    
+
     if graph == graphs[1]:
         fig2=plt.figure(figsize=(10,6))
         valeurs=df[['NA_Sales','EU_Sales','JP_Sales','Other_Sales']].sum()
         plt.title('Répartition des Ventes par Région')
         plt.pie(x=valeurs.values,labels=valeurs.index,autopct=lambda x: f'{str(round(x, 2))}%');
         st.pyplot(fig2)
-    
+
     if graph == graphs[2]:
         choices_cat =st.radio("Choisissez les variables catégorielles à étudier", df_clean.select_dtypes(include=['object']).columns)
         fig3=plt.figure()
         df.select_dtypes(include=['object'])[choices_cat].value_counts()[:10].plot.pie(autopct=lambda x: f'{str(round(x, 2))}%')
-        plt.title('Répartition de la variable ' + str(choices_cat))
+        plt.title(f'Répartition de la variable {str(choices_cat)}')
         st.pyplot(fig3)
 
     if graph == graphs[3]:
         choices_num =st.radio("Choisissez les variables numériques à étudier", df_clean.select_dtypes(include=['int64', 'float64']).columns[:-1])
         fig4=plt.figure()
         sns.distplot(df[choices_num], label=choices_num)
-        plt.title('Histogramme de la variable ' + str(choices_num))
+        plt.title(f'Histogramme de la variable {str(choices_num)}')
         plt.legend(loc='best')
         st.pyplot(fig4)
-        
+
     if graph == graphs[4]:    
         fig5=plt.figure()
         sns.heatmap(df_clean.select_dtypes(include=['int64', 'float64']).corr(),annot=False)   
@@ -190,91 +190,150 @@ pipeline.fit(X_train, y_train)
 
 def get_score(model):
     if model == models[0]:
-        y=df_gd['Global_Sales']
-        X=df_gd.drop('Global_Sales', axis=1)
-        X_train, X_test, y_train, y_test = train_test_split(X, y,  test_size=0.2, random_state=42)
+        
+        lr=LinearRegression()
 
-        pipeline = make_pipeline(
-            StandardScaler(),
-            MinMaxScaler(),
-            SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
-            VarianceThreshold(threshold=0.1),
-            LinearRegression())
-
-        set_param_recursive(pipeline.steps, 'random_state', 42)
-        pipeline.fit(X_train, y_train)
-        y_pred_pipe = pipeline.predict(X_test)
-        r2 = r2_score(y_test, y_pred_pipe)
-        mse = mean_squared_error(y_test, y_pred_pipe)
-        mae = mean_absolute_error(y_test, y_pred_pipe)
-        return "R2", r2, "MSE", mse, "MAE", mae
-
+        lr.fit(X_train, y_train)
+        score_p = lr.score(X_test, y_test)
+        y_pred = lr.predict(X_test)
+        r2 = r2_score(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
+        st.markdown("Score : ")
+        st.write(score_p)
+        st.markdown("R2 : ")
+        st.write(r2)
+        st.markdown("MSE : ")
+        st.write(mse)
+        st.markdown("MAE : ")
+        st.write(mae)
+        
+        fig=plt.figure()
+        plt.scatter(y_pred, y_test)
+        plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], '--', color='red')
+        plt.xlabel('Predicted Values')
+        plt.ylabel('Actual Values')
+        plt.title('Linear Regression Performance')
+        st.pyplot(fig)
+        
+        return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
+        
+        
     if model == models[1]:
         num_n_neighbors=st.slider("Choisissez le nombre de voisins, n_neighbors : ", 1, 50, 17)
         num_weights=st.radio("Choisissez une fonction de pondération :", ['uniform', 'distance'])
         num_metrics=st.radio("Choisissez une fonction de distance entre les points :", ['minkowski', 'euclidean', 'manhattan', 'chebyshev'])
         num_algos=st.radio("Choisissez une fonction de distance entre les points :", ['auto', 'ball_tree', 'kd_tree', 'brute'])
         
-        y=df_gd['Global_Sales']
-        X=df_gd.drop('Global_Sales', axis=1)
-        X_train, X_test, y_train, y_test = train_test_split(X, y,  test_size=0.2, random_state=42)
+        knn=KNeighborsRegressor(n_neighbors=num_n_neighbors, weights=num_weights, metric=num_metrics, algorithm=num_algos)
 
-        pipeline = make_pipeline(
-            StandardScaler(),
-            MinMaxScaler(),
-            SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
-            VarianceThreshold(threshold=0.1),
-            KNeighborsRegressor(n_neighbors=num_n_neighbors, weights=num_weights, metric=num_metrics, algorithm=num_algos))
-        pipeline.fit(X_train, y_train)
-        y_pred_pipe = pipeline.predict(X_test)
-        r2 = r2_score(y_test, y_pred_pipe)
-        mse = mean_squared_error(y_test, y_pred_pipe)
-        mae = mean_absolute_error(y_test, y_pred_pipe)
-        return "R2", r2, "MSE", mse, "MAE", mae
+        knn.fit(X_train, y_train)
+        score_p = knn.score(X_test, y_test)
+        y_pred = knn.predict(X_test)
+        r2 = r2_score(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
+        st.markdown("Score : ")
+        st.write(score_p)
+        st.markdown("R2 : ")
+        st.write(r2)
+        st.markdown("MSE : ")
+        st.write(mse)
+        st.markdown("MAE : ")
+        st.write(mae)
+        
+        fig=plt.figure()
+        plt.scatter(y_pred, y_test)
+        plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], '--', color='red')
+        plt.xlabel('Predicted Values')
+        plt.ylabel('Actual Values')
+        plt.title('KNeighborsRegressor Performance \n R-squared score: {:.2f}'.format(r2))
+        st.pyplot(fig)
+        
+        return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
 
     if model == models[2]:
-        y=df_gd['Global_Sales']
-        X=df_gd.drop('Global_Sales', axis=1)
-        X_train, X_test, y_train, y_test = train_test_split(X, y,  test_size=0.2, random_state=42)
+ 
+        rf = RandomForestRegressor()
 
-        pipeline = make_pipeline(
-            StandardScaler(),
-            MinMaxScaler(),
-            SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
-            VarianceThreshold(threshold=0.1),
-            RandomForestRegressor())
-        pipeline.fit(X_train, y_train)
-        y_pred_pipe = pipeline.predict(X_test)
-        r2 = r2_score(y_test, y_pred_pipe)
-        mse = mean_squared_error(y_test, y_pred_pipe)
-        mae = mean_absolute_error(y_test, y_pred_pipe)
-        return "R2", r2, "MSE", mse, "MAE", mae
+        set_param_recursive(pipeline.steps, 'random_state', 42)
+        rf.fit(X_train, y_train)
+        score_p = rf.score(X_test, y_test)
+        y_pred = rf.predict(X_test)
+        r2 = r2_score(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
+        st.markdown("Score : ")
+        st.write(score_p)
+        st.markdown("R2 : ")
+        st.write(r2)
+        st.markdown("MSE : ")
+        st.write(mse)
+        st.markdown("MAE : ")
+        st.write(mae)
+        
+        fig=plt.figure()
+        plt.scatter(y_pred, y_test)
+        plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], '--', color='red')
+        plt.xlabel('Predicted Values')
+        plt.ylabel('Actual Values')
+        plt.title('RandomForestRegressor Performance \n R-squared score: {:.2f}'.format(r2))
+        st.pyplot(fig)        
+        
+        
+        importances = rf.feature_importances_
+        std = np.std([tree.feature_importances_ for tree in rf.estimators_], axis=0)
+        indices = np.argsort(importances)[::-1]
+
+        fig2=plt.figure()
+        plt.title("Feature importances")
+        plt.bar(range(X_train.shape[1]), importances[indices], yerr=std[indices], align="center")
+        plt.xticks(range(X_train.shape[1]), X_train.columns[indices], rotation='vertical')
+        plt.xlim([-1, X_train.shape[1]])
+        st.pyplot(fig2)
+        
+        return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
     
     if model == models[3]:
         num_alpha=st.slider("Choisissez la hauteur d'alpha :", 0.0, 10.0, 0.1)
         num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 10000, 10000)
         num_selection=st.radio("Choisissez la méthode utilisée pour sélectionner les variables dans le modèle :", ['cyclic', 'random', 'adaptive'])
         
-        y=df_gd['Global_Sales']
-        X=df_gd.drop('Global_Sales', axis=1)
-        X_train, X_test, y_train, y_test = train_test_split(X, y,  test_size=0.2, random_state=42)
+        lass=Lasso(alpha=num_alpha, max_iter=num_max_iter, random_state=42, fit_intercept=True, selection=num_selection)
 
-        pipeline = make_pipeline(
-            StandardScaler(),
-            MinMaxScaler(),
-            SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
-            VarianceThreshold(threshold=0.1),
-            Lasso(alpha=num_alpha, max_iter=num_max_iter, random_state=42, fit_intercept=True, selection=num_selection))
-        pipeline.fit(X_train, y_train)
-        y_pred_pipe = pipeline.predict(X_test)
-        r2 = r2_score(y_test, y_pred_pipe)
-        mse = mean_squared_error(y_test, y_pred_pipe)
-        mae = mean_absolute_error(y_test, y_pred_pipe)
-        return "R2", r2, "MSE", mse, "MAE", mae
+        lass.fit(X_train, y_train)
+        score_p = lass.score(X_test, y_test)
+        y_pred = lass.predict(X_test)
+        r2 = r2_score(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
+        st.markdown("Score : ")
+        st.write(score_p)
+        st.markdown("R2 : ")
+        st.write(r2)
+        st.markdown("MSE : ")
+        st.write(mse)
+        st.markdown("MAE : ")
+        st.write(mae)
+        
+        fig=plt.figure()        
+        plt.scatter(y_pred, y_test)
+        plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], '--', color='red')
+        plt.xlabel('Predicted Values')
+        plt.ylabel('Actual Values')
+        plt.title('Lasso Performance \n R-squared score: {:.2f}'.format(r2))
+        plt.show()
+
+        # Create the coefficients plot
+        coef = pd.Series(lass.coef_, index = X_train.columns)
+        imp_coef = pd.concat([coef.sort_values().head(10),
+                            coef.sort_values().tail(10)])
+        plt.rcParams['figure.figsize'] = (8.0, 10.0)
+        imp_coef.plot(kind = "barh")
+        plt.title("Coefficients in the Lasso Model")
+        st.pyplot(fig)
+        
+        return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
 
     if model == models[4]:
         num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 10000, 10000)
@@ -283,50 +342,88 @@ def get_score(model):
         num_loss=st.radio("Choisissez la fonction de perte utilisée pour optimiser le modèle :", ['epsilon_insensitive', 'squared_epsilon_insensitive', 'huber'])
         num_verbose=st.slider("Choisissez le nombre d'information à afficher :", 0, 10, 1)
         
-        y=df_gd['Global_Sales']
-        X=df_gd.drop('Global_Sales', axis=1)
-        X_train, X_test, y_train, y_test = train_test_split(X, y,  test_size=0.2, random_state=42)
+        line=LinearSVR(C=num_C, epsilon=num_epsilon, loss=num_loss, max_iter=num_max_iter, verbose=num_verbose )
 
-        pipeline = make_pipeline(
-            StandardScaler(),
-            MinMaxScaler(),
-            SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
-            VarianceThreshold(threshold=0.1),
-            LinearSVR(C=num_C, epsilon=num_epsilon, loss=num_loss, max_iter=num_max_iter, verbose=num_verbose ))
-        pipeline.fit(X_train, y_train)
-        y_pred_pipe = pipeline.predict(X_test)
-        r2 = r2_score(y_test, y_pred_pipe)
-        mse = mean_squared_error(y_test, y_pred_pipe)
-        mae = mean_absolute_error(y_test, y_pred_pipe)
-        return "R2", r2, "MSE", mse, "MAE", mae
+        line.fit(X_train, y_train)
+        score_p = line.score(X_test, y_test)
+        y_pred = line.predict(X_test)
+        r2 = r2_score(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
+        st.markdown("Score : ")
+        st.write(score_p)
+        st.markdown("R2 : ")
+        st.write(r2)
+        st.markdown("MSE : ")
+        st.write(mse)
+        st.markdown("MAE : ")
+        st.write(mae)
+        
+        fig=plt.figure()
+        plt.scatter(y_pred, y_test)
+        plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], '--', color='red')
+        plt.xlabel('Predicted Values')
+        plt.ylabel('Actual Values')
+        plt.title('LinearSVR Performance \n R-squared score: {:.2f}'.format(r2))
+        st.pyplot(fig)
+
+        # Create the residuals plot
+        residuals = y_test - y_pred
+        fig2=plt.figure()
+        plt.scatter(y_pred, residuals)
+        plt.plot([min(y_pred), max(y_pred)], [0, 0], '--', color='red')
+        plt.xlabel('Predicted Values')
+        plt.ylabel('Residuals')
+        plt.title('Residuals Plot')
+        st.pyplot(fig2)
+
+        return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae 
 
     if model == models[5]:
         num_alpha=st.slider("Choisissez la hauteur d'alpha :", 1, 10000, 1000)
         #num_verbose=st.slider("Choisissez le nombre d'information à afficher :", 0, 10, 1)
         
-        y=df_gd['Global_Sales']
-        X=df_gd.drop('Global_Sales', axis=1)
-        X_train, X_test, y_train, y_test = train_test_split(X, y,  test_size=0.2, random_state=42)
+        lassCV=LassoLarsCV(max_n_alphas=num_alpha, verbose=False)
 
-        pipeline = make_pipeline(
-            StandardScaler(),
-            MinMaxScaler(),
-            SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
-            VarianceThreshold(threshold=0.1),
-            LassoLarsCV(max_n_alphas=num_alpha, verbose=False))
-        pipeline.fit(X_train, y_train)
-        y_pred_pipe = pipeline.predict(X_test)
-        r2 = r2_score(y_test, y_pred_pipe)
-        mse = mean_squared_error(y_test, y_pred_pipe)
-        mae = mean_absolute_error(y_test, y_pred_pipe)
-        return "R2", r2, "MSE", mse, "MAE", mae
-         
+        lassCV.fit(X_train, y_train)
+        score_p = lassCV.score(X_test, y_test)
+        y_pred = lassCV.predict(X_test)
+        r2 = r2_score(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
+        st.markdown("Score : ")
+        st.write(score_p)
+        st.markdown("R2 : ")
+        st.write(r2)
+        st.markdown("MSE : ")
+        st.write(mse)
+        st.markdown("MAE : ")
+        st.write(mae)
+        
+        fig=plt.figure()
+        plt.scatter(y_pred, y_test)
+        plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], '--', color='red')
+        plt.xlabel('Predicted Values')
+        plt.ylabel('Actual Values')
+        plt.title('LassoLarsCV Performance \n R-squared score: {:.2f}'.format(r2))
+        st.pyplot(fig)
+
+        # Create the coefficients plot
+        coef = pd.Series(lassCV.coef_, index = X_train.columns)
+        imp_coef = pd.concat([coef.sort_values().head(10),
+                            coef.sort_values().tail(10)])
+        fig2=plt.figure()
+        plt.rcParams['figure.figsize'] = (8.0, 10.0)
+        imp_coef.plot(kind = "barh")
+        plt.title("Coefficients in the LassoLarsCV Model")
+        st.pyplot(fig2)
+
+        return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
+    
 if page == pages[3]:
     st.header("Entrainement des modèles")
     model = st.radio("Choisissez votre modèle", models)
-    st.write("Score obtenu", get_score(model))
+    st.write("Scores obtenu", get_score(model))
     
     
     
