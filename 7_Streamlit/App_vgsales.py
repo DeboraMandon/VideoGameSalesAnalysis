@@ -447,7 +447,7 @@ def get_score(model):
         num_dual=st.radio("Résout le problème dual de la formulation SVM, dual :", [True, False])  
         num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [True, False])  
         
-        line=LinearSVR(C=num_C, epsilon=num_epsilon, loss=num_loss, max_iter=num_max_iter, loss=num_loss,
+        line=LinearSVR(C=num_C, epsilon=num_epsilon, loss=num_loss, max_iter=num_max_iter,
                        dual=num_dual, fit_intercept=num_fit_intercept)
 
         line.fit(X_train, y_train)
@@ -534,7 +534,8 @@ def get_score(model):
 
 if page == pages[3]:
     st.header("Choix des paramètres pour le modèle")
-    model = st.radio("Recherche des meilleurs paramètres", models)
+    st.image('param.jpg')
+    model = st.selectbox("Recherche des meilleurs paramètres", models)
     st.write("Hyperparamètres obtenus :", get_param(model))    
     
     
@@ -542,6 +543,7 @@ if page == pages[4]:
     st.title("Entrainement des modèles")
     st.header("Choix du modèle")
     model = st.selectbox("Choisissez votre modèle", models)
+    st.image('ml.jpg')
     st.header('Réglage des paramètres')
     st.write("Scores obtenu :", get_score(model))
     
