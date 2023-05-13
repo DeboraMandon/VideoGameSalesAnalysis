@@ -13,6 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import LinearSVR
 from sklearn.linear_model import LassoLarsCV
 from sklearn.feature_selection import VarianceThreshold
+from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import make_pipeline, make_union
 from sklearn.feature_selection import f_regression
 from sklearn.model_selection import train_test_split
@@ -29,10 +30,10 @@ df_gd=pd.get_dummies(df_clean)
 
 
 st.sidebar.title("Video Games Sales Analysis")
-st.sidebar.image('gamer.png')
+st.sidebar.image('image-jeux-video.jpg')
 st.sidebar.subheader("Navigation")
 
-pages=['Présentation du projet', 'Dataframe', 'Data Visualisation', 'Modélisation']
+pages=['Présentation du projet', 'Dataframe', 'Data Visualisation', 'Hyperparamètres', 'Modélisation']
 models= ["Regression Linéaire", "KNN", "Random forest", 'Lasso', 'LinearSVR', 'LassoLarsCV']
 page=st.sidebar.radio("Choisissez votre page", pages)
 
@@ -40,7 +41,7 @@ page=st.sidebar.radio("Choisissez votre page", pages)
 if page == pages[0]:
     st.title("Video Games Sales Analysis")
     st.header("Machine Learning Project")
-    st.subheader("by Débora Mandon")
+    st.subheader("par Débora Mandon")
     st.image('image-jeux-video.jpg')
     st.markdown("Pour ce projet il faudra estimer les ventes totales d’un jeu vidéo à l’aide d’informations descriptives comme: \n"
                 "- Le pays d’origine \n"
@@ -171,6 +172,8 @@ if page == pages[2]:
         sns.heatmap(df_clean.select_dtypes(include=['int64', 'float64']).corr(),annot=False)   
         st.pyplot(fig5)
 
+
+
 # Entrainement des modèles
 
 y=df_gd['Global_Sales']
@@ -188,11 +191,96 @@ pipeline = make_pipeline(
 set_param_recursive(pipeline.steps, 'random_state', 42)
 pipeline.fit(X_train, y_train)
 
+def get_param(model):
+    if model == models[0]:
+        lr=LinearRegression()
+        param_grid = {'fit_intercept': [True, False], 'copy_X': [True, False], 'n_jobs': [-1, 10, 1], 'positive': [True, False] } 
+        grid_search = GridSearchCV(lr, param_grid, cv=5, scoring='neg_mean_squared_error')
+        grid_search.fit(X_train, y_train)
+        best_param=grid_search.best_params_
+        score=grid_search.best_score_
+        st.markdown("Meilleurs hyperparamètres : ")
+        st.write(best_param)
+        st.markdown("Meilleure performance : ")
+        st.write(score)
+
+    if model == models[1]:
+        knn=KNeighborsRegressor()
+        param_grid = {'n_neighbors': [1, 20, 1], 'weights': ['uniform', 'distance'], 'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute'],
+                      'leaf_size': [1, 100, 1], "p" : [1, 20, 1], "metric" : ['minkowski', 'euclidean', 'manhattan', 'chebyshev']} 
+        grid_search = GridSearchCV(knn, param_grid, cv=5, scoring='neg_mean_squared_error')
+        grid_search.fit(X_train, y_train)
+        best_param=grid_search.best_params_
+        score=grid_search.best_score_
+        st.markdown("Meilleurs hyperparamètres : ")
+        st.write(best_param)
+        st.markdown("Meilleure performance : ")
+        st.write(score)
+            
+    if model == models[2]:
+        rf=RandomForestRegressor()
+        param_grid = {'n_estimators': [1, 100, 1], 'criterion': ['squared_error', 'absolute_error', 'friedman_mse', 'poisson'], 
+                      'min_samples_split': [2, 100, 1], 'min_samples_leaf': [2, 100, 1], 'min_weight_fraction_leaf' : [0.0, 10, 0.1],
+                      'max_features' :['sqrt', 'log2', 'auto', None]} 
+        grid_search = GridSearchCV(rf, param_grid, cv=5, scoring='neg_mean_squared_error')
+        grid_search.fit(X_train, y_train)
+        best_param=grid_search.best_params_
+        score=grid_search.best_score_
+        st.markdown("Meilleurs hyperparamètres : ")
+        st.write(best_param)
+        st.markdown("Meilleure performance : ")
+        st.write(score)
+        
+    if model == models[3]:
+        lass=Lasso()
+        param_grid = {'alpha': [0.1, 20, 0.1] , 'fit_intercept': [True, False], 'precompute' : [True, False],
+                      'copy_X': [True, False], 'max_iter' : [1, 1000, 1],'positive': [True, False], 'selection' : ['cyclic', 'random']} 
+        grid_search = GridSearchCV(lass, param_grid, cv=5, scoring='neg_mean_squared_error')
+        grid_search.fit(X_train, y_train)
+        best_param=grid_search.best_params_
+        score=grid_search.best_score_
+        st.markdown("Meilleurs hyperparamètres : ")
+        st.write(best_param)
+        st.markdown("Meilleure performance : ")
+        st.write(score)
+        
+    if model == models[4]:
+        line=LinearSVR()
+        param_grid = {'C': [0.0, 10, 0.1], 'loss': ['epsilon_insensitive', 'squared_epsilon_insensitive'],
+                      'dual': [True, False], 'fit_intercept': [True, False], 'intercept_scaling': [1, 100, 1], 
+                      'epsilon' : [0.0, 10, 0.1], 'max_iter' : [1, 1000, 1]} 
+        grid_search = GridSearchCV(line, param_grid, cv=5, scoring='neg_mean_squared_error')
+        grid_search.fit(X_train, y_train)
+        best_param=grid_search.best_params_
+        score=grid_search.best_score_
+        st.markdown("Meilleurs hyperparamètres : ")
+        st.write(best_param)
+        st.markdown("Meilleure performance : ")
+        st.write(score)
+        
+    if model == models[5]:
+        lassCV=LassoLarsCV()
+        param_grid = {'fit_intercept' : [True, False], 'max_iter' : [1, 1000, 1], 'normalize' : [True, False],
+                      'precompute' : [True, False], 'cv': [1, 50, 1], 'max_n_alphas' : [1, 1000, 1], 
+                      'n_jobs': [1, 100, 1],'copy_X': [True, False]} 
+        grid_search = GridSearchCV(lassCV, param_grid, cv=5, scoring='neg_mean_squared_error')
+        grid_search.fit(X_train, y_train)
+        best_param=grid_search.best_params_
+        score=grid_search.best_score_
+        st.markdown("Meilleurs hyperparamètres : ")
+        st.write(best_param)
+        st.markdown("Meilleure performance : ")
+        st.write(score)
+        
+               
 def get_score(model):
     if model == models[0]:
-        
-        lr=LinearRegression()
+        num_intercept=st.radio("Choisissez un fit_intercept :", [True, False])
+        num_copy_X=st.radio("Choisissez copy_X :", [True, False])
+        num_n_jobs=st.slider("Choisissez le nombre de n_jobs : ", -1, 10, 1)
+        num_positive=st.radio("Choisissez le positive :", [True, False])
 
+        lr=LinearRegression(fit_intercept=num_intercept, copy_X=num_copy_X, n_jobs=num_n_jobs, positive=num_positive)
         lr.fit(X_train, y_train)
         score_p = lr.score(X_test, y_test)
         y_pred = lr.predict(X_test)
@@ -215,18 +303,20 @@ def get_score(model):
         plt.ylabel('Actual Values')
         plt.title('Linear Regression Performance')
         st.pyplot(fig)
-        
+                
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
         
         
     if model == models[1]:
-        num_n_neighbors=st.slider("Choisissez le nombre de voisins, n_neighbors : ", 1, 50, 17)
-        num_weights=st.radio("Choisissez une fonction de pondération :", ['uniform', 'distance'])
-        num_metrics=st.radio("Choisissez une fonction de distance entre les points :", ['minkowski', 'euclidean', 'manhattan', 'chebyshev'])
-        num_algos=st.radio("Choisissez une fonction de distance entre les points :", ['auto', 'ball_tree', 'kd_tree', 'brute'])
         
-        knn=KNeighborsRegressor(n_neighbors=num_n_neighbors, weights=num_weights, metric=num_metrics, algorithm=num_algos)
-
+        num_n_neighbors=st.slider("Choisissez le nombre de voisins, n_neighbors : ", 1, 50, 17)
+        num_weights=st.radio("Choisissez une fonction de pondération, weights :", ['uniform', 'distance'])
+        num_metrics=st.radio("Choisissez une fonction de distance entre les points, metric :", ['minkowski', 'euclidean', 'manhattan', 'chebyshev'])
+        num_algos=st.radio("Choisissez une fonction de distance entre les points, algorithm :", ['auto', 'ball_tree', 'kd_tree', 'brute'])
+        num_leaf_size=st.slider("Choisissez taille de la feuille de l'arbre, leaf_size : ", 1, 100, 30)        
+        
+        knn=KNeighborsRegressor(n_neighbors=num_n_neighbors, weights=num_weights, metric=num_metrics, algorithm=num_algos, leaf_size=num_leaf_size)
+        
         knn.fit(X_train, y_train)
         score_p = knn.score(X_test, y_test)
         y_pred = knn.predict(X_test)
@@ -254,7 +344,15 @@ def get_score(model):
 
     if model == models[2]:
  
-        rf = RandomForestRegressor()
+        num_n_estimators=st.slider("Choisissez nombre d'arbres dans la forêt, n_estimators : ", 1, 100, 100)
+        num_criterion=st.radio("Choisissez la mesure de qualité de la division de l'arbre, criterion :", ['squared_error', 'absolute_error', 'friedman_mse', 'poisson'])
+        num_min_samples_split=st.slider("Choisissez le nombre minimum d'échantillons requis pour diviser un nœud interne, min_samples_split : ", 2, 100, 2)  
+        num_min_samples_leaf=st.slider("Choisissez le nombre minimum d'échantillons requis pour être à une feuille, min_samples_leaf : ", 1, 100, 1)  
+        num_min_weight_fraction_leaf=st.slider("Choisissez la fraction minimale du poids total des échantillons (pondérés) requise pour être à une feuille, min_weight_fraction_leaf : ", 0.0, 10, 0.0)  
+        num_max_features=st.radio("Choisissez le nombre de caractéristiques à considérer lors de la recherche de la meilleure division, max_features :", ['sqrt', 'log2', 'auto', None])
+
+        rf = RandomForestRegressor(n_estimators=num_n_estimators, criterion=num_criterion, min_samples_split=num_min_samples_split,
+                                   min_samples_leaf=num_min_samples_leaf, min_weight_fraction_leaf=num_min_weight_fraction_leaf, max_features=num_max_features)
 
         set_param_recursive(pipeline.steps, 'random_state', 42)
         rf.fit(X_train, y_train)
@@ -295,11 +393,16 @@ def get_score(model):
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
     
     if model == models[3]:
-        num_alpha=st.slider("Choisissez la hauteur d'alpha :", 0.0, 10.0, 0.1)
+        num_alpha=st.slider("Choisissez le paramètre de régularisation, alpha :", 0.0, 20.0, 1.0)
+        num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [True, False])
+        num_precompute=st.radio("Utilise une version de précalcul pour la matrice X, precompute :", [True, False])  
+        num_copy_X=st.radio("Choisissez copy_X :", [True, False])      
         num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 10000, 10000)
-        num_selection=st.radio("Choisissez la méthode utilisée pour sélectionner les variables dans le modèle :", ['cyclic', 'random', 'adaptive'])
+        num_positive=st.radio("Restreint les coefficients à être positifs, positive :", [True, False])         
+        num_selection=st.radio("Choisissez la méthode utilisée pour sélectionner les variables dans le modèle :", ['cyclic', 'random'])
         
-        lass=Lasso(alpha=num_alpha, max_iter=num_max_iter, random_state=42, fit_intercept=True, selection=num_selection)
+        lass=Lasso(alpha=num_alpha, fit_intercept=num_fit_intercept, precompute=num_precompute, 
+                   copy_X=num_copy_X, max_iter=num_max_iter, positive=num_positive , selection=num_selection)
 
         lass.fit(X_train, y_train)
         score_p = lass.score(X_test, y_test)
@@ -336,13 +439,16 @@ def get_score(model):
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
 
     if model == models[4]:
+                      
         num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 10000, 10000)
         num_C=st.slider("Choisissez la force de régularisation, C :", 0.1, 1000.0, 1.0)
         num_epsilon=st.slider("Choisissez la marge de tolérance de l'erreur, epsilon :", 0.1, 1000000.0, 0.1)
-        num_loss=st.radio("Choisissez la fonction de perte utilisée pour optimiser le modèle :", ['epsilon_insensitive', 'squared_epsilon_insensitive', 'huber'])
-        num_verbose=st.slider("Choisissez le nombre d'information à afficher :", 0, 10, 1)
+        num_loss=st.radio("Choisissez la fonction de perte utilisée pour optimiser le modèle, loss :", ['epsilon_insensitive', 'squared_epsilon_insensitive', 'huber'])
+        num_dual=st.radio("Résout le problème dual de la formulation SVM, dual :", [True, False])  
+        num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [True, False])  
         
-        line=LinearSVR(C=num_C, epsilon=num_epsilon, loss=num_loss, max_iter=num_max_iter, verbose=num_verbose )
+        line=LinearSVR(C=num_C, epsilon=num_epsilon, loss=num_loss, max_iter=num_max_iter, loss=num_loss,
+                       dual=num_dual, fit_intercept=num_fit_intercept)
 
         line.fit(X_train, y_train)
         score_p = line.score(X_test, y_test)
@@ -380,10 +486,16 @@ def get_score(model):
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae 
 
     if model == models[5]:
-        num_alpha=st.slider("Choisissez la hauteur d'alpha :", 1, 10000, 1000)
-        #num_verbose=st.slider("Choisissez le nombre d'information à afficher :", 0, 10, 1)
-        
-        lassCV=LassoLarsCV(max_n_alphas=num_alpha, verbose=False)
+        num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [True, False])  
+        num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 10000, 10000)
+        num_normalize=st.radio("Normalise les variables explicatives, normalize :", [True, False])  
+        num_precompute=st.radio("Utilise une version de précalcul pour la matrice X, precompute :", [True, False])  
+        num_cv=st.slider("Nombre de folds pour la validation croisée, CV :", 1, 50, 10)
+        num_n_alpha=st.slider("Nombre maximal de valeurs de l'hyperparamètre alpha à tester, n_alphas :", 1, 10000, 1000)
+        num_copy_X=st.radio("Choisissez copy_X :", [True, False])      
+                
+        lassCV=LassoLarsCV(fit_intercept=num_fit_intercept,max_iter=num_max_iter, normalize=num_normalize, precompute=num_precompute,
+                           cv=num_cv, max_n_alphas=num_n_alpha, copy_X=num_copy_X)
 
         lassCV.fit(X_train, y_train)
         score_p = lassCV.score(X_test, y_test)
@@ -419,11 +531,19 @@ def get_score(model):
         st.pyplot(fig2)
 
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
-    
+
 if page == pages[3]:
-    st.header("Entrainement des modèles")
-    model = st.radio("Choisissez votre modèle", models)
-    st.write("Scores obtenu", get_score(model))
+    st.header("Choix des paramètres pour le modèle")
+    model = st.radio("Recherche des meilleurs paramètres", models)
+    st.write("Hyperparamètres obtenus :", get_param(model))    
+    
+    
+if page == pages[4]:
+    st.title("Entrainement des modèles")
+    st.header("Choix du modèle")
+    model = st.selectbox("Choisissez votre modèle", models)
+    st.header('Réglage des paramètres')
+    st.write("Scores obtenu :", get_score(model))
     
     
     
