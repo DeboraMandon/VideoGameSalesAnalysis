@@ -21,6 +21,8 @@ from tpot.export_utils import set_param_recursive
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 import numpy as np
 import re
+import joblib
+import optuna
 
 df= pd.read_csv("gaming_total_v2.csv")
 df= df.drop('Unnamed: 0', axis=1)
@@ -117,7 +119,7 @@ if page == pages[1]:
 
 if page == pages[2]:
     st.header("Data Visualisation")
-    st.subheader("Pour visualiser les données à l'aide de graphiques, choisissez un type de visualisation puis les variables à explorer."
+    st.subheader("Visualiser les données à l'aide de graphiques, choisissez un type de visualisation puis les variables à explorer."
                  )
     graphs=["Evolution des ventes par Région", "Répartition des Ventes par Région", 
             "Répartition des 10 catégories les plus représentées par variables catégorielles", "Distribution des variables numériques",
@@ -181,109 +183,107 @@ X=df_gd.drop('Global_Sales', axis=1)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y,  test_size=0.2, random_state=42)
 
-pipeline = make_pipeline(
-    StandardScaler(),
-    MinMaxScaler(),
-    SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-    StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
-    VarianceThreshold(threshold=0.1))
-
-set_param_recursive(pipeline.steps, 'random_state', 42)
-pipeline.fit(X_train, y_train)
-
-def get_param(model):
+def get_param(trial, model):
     if model == models[0]:
+        fit_intercept = trial.suggest_categorical('fit_intercept', [True, False])
+        n_jobs = trial.suggest_uniform('n_jobs', -1, 10)
+        copy_X = trial.suggest_categorical('copy_X', [True, False])
+        positive = trial.suggest_categorical('positive', [True, False])
         lr=LinearRegression()
-        param_grid = {'fit_intercept': [True, False], 'copy_X': [True, False], 'n_jobs': [-1, 10, 1], 'positive': [True, False] } 
-        grid_search = GridSearchCV(lr, param_grid, cv=5, scoring='neg_mean_squared_error')
-        grid_search.fit(X_train, y_train)
-        best_param=grid_search.best_params_
-        score=grid_search.best_score_
-        st.markdown("Meilleurs hyperparamètres : ")
-        st.write(best_param)
-        st.markdown("Meilleure performance : ")
-        st.write(score)
+        lr.fit(X_train, y_train)
+        y_pred = lr.predict(X_test)
+        mse = mean_squared_error(y_test, y_pred)
+        return mse
 
     if model == models[1]:
+        weights = trial.suggest_categorical('weights', ['uniform', 'distance'])
+        n_neighbors = trial.suggest_uniform('n_neighbors', 1, 20)
+        algorithm = trial.suggest_categorical('algorithm', ['auto', 'ball_tree', 'kd_tree', 'brute'])
+        leaf_size = trial.suggest_categorical('leaf_size', [1, 100])
+        p = trial.suggest_categorical('p', [1, 20])
+        metric = trial.suggest_categorical('metric', ['minkowski', 'euclidean', 'manhattan', 'chebyshev'])
         knn=KNeighborsRegressor()
-        param_grid = {'n_neighbors': [1, 20, 1], 'weights': ['uniform', 'distance'], 'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute'],
-                      'leaf_size': [1, 100, 1], "p" : [1, 20, 1], "metric" : ['minkowski', 'euclidean', 'manhattan', 'chebyshev']} 
-        grid_search = GridSearchCV(knn, param_grid, cv=5, scoring='neg_mean_squared_error')
-        grid_search.fit(X_train, y_train)
-        best_param=grid_search.best_params_
-        score=grid_search.best_score_
-        st.markdown("Meilleurs hyperparamètres : ")
-        st.write(best_param)
-        st.markdown("Meilleure performance : ")
-        st.write(score)
+        knn.fit(X_train, y_train)
+        y_pred = knn.predict(X_test)
+        mse = mean_squared_error(y_test, y_pred)
+        return mse
             
     if model == models[2]:
+        n_estimators = trial.suggest_uniform('n_estimators', 1, 100)
+        criterion = trial.suggest_categorical('criterion', ['squared_error', 'absolute_error', 'friedman_mse', 'poisson'])
+        min_samples_split = trial.suggest_categorical('min_samples_split', [2, 100])
+        min_samples_leaf = trial.suggest_categorical('min_samples_leaf', [2, 100])
+        min_weight_fraction_leaf = trial.suggest_categorical('min_weight_fraction_leaf', [0.0, 10])
+        max_features = trial.suggest_categorical('max_features', ['sqrt', 'log2', 'auto', None])               
         rf=RandomForestRegressor()
-        param_grid = {'n_estimators': [1, 100, 1], 'criterion': ['squared_error', 'absolute_error', 'friedman_mse', 'poisson'], 
-                      'min_samples_split': [2, 100, 1], 'min_samples_leaf': [2, 100, 1], 'min_weight_fraction_leaf' : [0.0, 10, 0.1],
-                      'max_features' :['sqrt', 'log2', 'auto', None]} 
-        grid_search = GridSearchCV(rf, param_grid, cv=5, scoring='neg_mean_squared_error')
-        grid_search.fit(X_train, y_train)
-        best_param=grid_search.best_params_
-        score=grid_search.best_score_
-        st.markdown("Meilleurs hyperparamètres : ")
-        st.write(best_param)
-        st.markdown("Meilleure performance : ")
-        st.write(score)
+        rf.fit(X_train, y_train)
+        y_pred = rf.predict(X_test)
+        mse = mean_squared_error(y_test, y_pred)
+        return mse
         
     if model == models[3]:
+        alpha = trial.suggest_uniform('alpha', 0.1, 20) 
+        fit_intercept = trial.suggest_categorical('fit_intercept', [True, False])
+        precompute = trial.suggest_categorical('precompute', [True, False])
+        copy_X = trial.suggest_categorical('copy_X', [True, False])
+        max_iter = trial.suggest_uniform('max_iter', 1, 1000) 
+        positive = trial.suggest_categorical('positive', [True, False])
+        selection = trial.suggest_categorical('selection', ['cyclic', 'random'])
         lass=Lasso()
-        param_grid = {'alpha': [0.1, 20, 0.1] , 'fit_intercept': [True, False], 'precompute' : [True, False],
-                      'copy_X': [True, False], 'max_iter' : [1, 1000, 1],'positive': [True, False], 'selection' : ['cyclic', 'random']} 
-        grid_search = GridSearchCV(lass, param_grid, cv=5, scoring='neg_mean_squared_error')
-        grid_search.fit(X_train, y_train)
-        best_param=grid_search.best_params_
-        score=grid_search.best_score_
-        st.markdown("Meilleurs hyperparamètres : ")
-        st.write(best_param)
-        st.markdown("Meilleure performance : ")
-        st.write(score)
+        lass.fit(X_train, y_train)
+        y_pred = lass.predict(X_test)
+        mse = mean_squared_error(y_test, y_pred)
+        return mse
         
     if model == models[4]:
+        C = trial.suggest_uniform('C', 0.0, 10) 
+        loss = trial.suggest_categorical('loss', ['epsilon_insensitive', 'squared_epsilon_insensitive'])
+        dual = trial.suggest_categorical('dual', [True, False])
+        fit_intercept = trial.suggest_categorical('fit_intercept', [True, False])     
+        intercept_scaling = trial.suggest_uniform('intercept_scaling', 1, 100) 
+        epsilon = trial.suggest_uniform('epsilon', 0.0, 10)   
+        max_iter = trial.suggest_uniform('max_iter', 1, 1000) 
         line=LinearSVR()
-        param_grid = {'C': [0.0, 10, 0.1], 'loss': ['epsilon_insensitive', 'squared_epsilon_insensitive'],
-                      'dual': [True, False], 'fit_intercept': [True, False], 'intercept_scaling': [1, 100, 1], 
-                      'epsilon' : [0.0, 10, 0.1], 'max_iter' : [1, 1000, 1]} 
-        grid_search = GridSearchCV(line, param_grid, cv=5, scoring='neg_mean_squared_error')
-        grid_search.fit(X_train, y_train)
-        best_param=grid_search.best_params_
-        score=grid_search.best_score_
-        st.markdown("Meilleurs hyperparamètres : ")
-        st.write(best_param)
-        st.markdown("Meilleure performance : ")
-        st.write(score)
+        line.fit(X_train, y_train)
+        y_pred = line.predict(X_test)
+        mse = mean_squared_error(y_test, y_pred)
+        return mse
         
     if model == models[5]:
+        fit_intercept = trial.suggest_categorical('fit_intercept', [True, False])     
+        max_iter = trial.suggest_uniform('max_iter', 1, 1000)
+        normalize = trial.suggest_categorical('normalize', [True, False]) 
+        precompute = trial.suggest_categorical('precompute', [True, False]) 
+        cv = trial.suggest_uniform('cv', 1, 50)
+        max_n_alphas = trial.suggest_uniform('max_n_alphas', 1, 1000)
+        n_jobs = trial.suggest_uniform('n_jobs', 1, 100)
+        copy_X = trial.suggest_categorical('copy_X', [True, False])
         lassCV=LassoLarsCV()
-        param_grid = {'fit_intercept' : [True, False], 'max_iter' : [1, 1000, 1], 'normalize' : [True, False],
-                      'precompute' : [True, False], 'cv': [1, 50, 1], 'max_n_alphas' : [1, 1000, 1], 
-                      'n_jobs': [1, 100, 1],'copy_X': [True, False]} 
-        grid_search = GridSearchCV(lassCV, param_grid, cv=5, scoring='neg_mean_squared_error')
-        grid_search.fit(X_train, y_train)
-        best_param=grid_search.best_params_
-        score=grid_search.best_score_
-        st.markdown("Meilleurs hyperparamètres : ")
-        st.write(best_param)
-        st.markdown("Meilleure performance : ")
-        st.write(score)
+        lassCV.fit(X_train, y_train)
+        y_pred = lassCV.predict(X_test)
+        mse = mean_squared_error(y_test, y_pred)
+        return mse
         
                
 def get_score(model):
     if model == models[0]:
         num_intercept=st.radio("Choisissez un fit_intercept :", [True, False])
         num_copy_X=st.radio("Choisissez copy_X :", [True, False])
-        num_n_jobs=st.slider("Choisissez le nombre de n_jobs : ", -1, 10, 1)
-        num_positive=st.radio("Choisissez le positive :", [True, False])
+        num_n_jobs=st.slider("Choisissez le nombre de n_jobs : ", -1, 10, -1)
+        num_positive=st.radio("Choisissez le positive :", [False, True])
 
-        lr=LinearRegression(fit_intercept=num_intercept, copy_X=num_copy_X, n_jobs=num_n_jobs, positive=num_positive)
-        lr.fit(X_train, y_train)
-        score_p = lr.score(X_test, y_test)
-        y_pred = lr.predict(X_test)
+        pipeline = make_pipeline(
+        StandardScaler(),
+        MinMaxScaler(),
+        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
+        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        VarianceThreshold(threshold=0.1), 
+        LinearRegression(fit_intercept=num_intercept, copy_X=num_copy_X, n_jobs=num_n_jobs, positive=num_positive))
+
+        set_param_recursive(pipeline.steps, 'random_state', 42)
+        pipeline.fit(X_train, y_train)
+        score_p = pipeline.score(X_test, y_test)
+        y_pred = pipeline.predict(X_test)
         r2 = r2_score(y_test, y_pred)
         mse = mean_squared_error(y_test, y_pred)
         mae = mean_absolute_error(y_test, y_pred)
@@ -309,17 +309,26 @@ def get_score(model):
         
     if model == models[1]:
         
-        num_n_neighbors=st.slider("Choisissez le nombre de voisins, n_neighbors : ", 1, 50, 17)
+        num_n_neighbors=st.slider("Choisissez le nombre de voisins, n_neighbors : ", 1, 50, 11)
         num_weights=st.radio("Choisissez une fonction de pondération, weights :", ['uniform', 'distance'])
-        num_metrics=st.radio("Choisissez une fonction de distance entre les points, metric :", ['minkowski', 'euclidean', 'manhattan', 'chebyshev'])
-        num_algos=st.radio("Choisissez une fonction de distance entre les points, algorithm :", ['auto', 'ball_tree', 'kd_tree', 'brute'])
-        num_leaf_size=st.slider("Choisissez taille de la feuille de l'arbre, leaf_size : ", 1, 100, 30)        
+        num_metrics=st.radio("Choisissez une fonction de distance entre les points, metric :", ['euclidean', 'manhattan', 'chebyshev', 'minkowski'])
+        num_algos=st.radio("Choisissez une fonction de distance entre les points, algorithm :", ['kd_tree', 'brute', 'auto', 'ball_tree'])
+        num_leaf_size=st.slider("Choisissez taille de la feuille de l'arbre, leaf_size : ", 1, 100, 1)        
+        num_p=st.slider("Choisissez la taille de p, p : ", 1, 10, 1)  
+                
+        pipeline = make_pipeline(
+        StandardScaler(),
+        MinMaxScaler(),
+        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
+        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        VarianceThreshold(threshold=0.1), 
+        KNeighborsRegressor(n_neighbors=num_n_neighbors, weights=num_weights, metric=num_metrics, algorithm=num_algos, 
+                                leaf_size=num_leaf_size, p=num_p))
         
-        knn=KNeighborsRegressor(n_neighbors=num_n_neighbors, weights=num_weights, metric=num_metrics, algorithm=num_algos, leaf_size=num_leaf_size)
-        
-        knn.fit(X_train, y_train)
-        score_p = knn.score(X_test, y_test)
-        y_pred = knn.predict(X_test)
+        set_param_recursive(pipeline.steps, 'random_state', 42)
+        pipeline.fit(X_train, y_train)
+        score_p = pipeline.score(X_test, y_test)
+        y_pred = pipeline.predict(X_test)
         r2 = r2_score(y_test, y_pred)
         mse = mean_squared_error(y_test, y_pred)
         mae = mean_absolute_error(y_test, y_pred)
@@ -344,20 +353,27 @@ def get_score(model):
 
     if model == models[2]:
  
-        num_n_estimators=st.slider("Choisissez nombre d'arbres dans la forêt, n_estimators : ", 1, 100, 100)
-        num_criterion=st.radio("Choisissez la mesure de qualité de la division de l'arbre, criterion :", ['squared_error', 'absolute_error', 'friedman_mse', 'poisson'])
-        num_min_samples_split=st.slider("Choisissez le nombre minimum d'échantillons requis pour diviser un nœud interne, min_samples_split : ", 2, 100, 2)  
-        num_min_samples_leaf=st.slider("Choisissez le nombre minimum d'échantillons requis pour être à une feuille, min_samples_leaf : ", 1, 100, 1)  
-        num_min_weight_fraction_leaf=st.slider("Choisissez la fraction minimale du poids total des échantillons (pondérés) requise pour être à une feuille, min_weight_fraction_leaf : ", 0.0, 10, 0.0)  
+        num_n_estimators=st.slider("Choisissez nombre d'arbres dans la forêt, n_estimators : ", 1, 100, 18)
+        num_criterion=st.radio("Choisissez la mesure de qualité de la division de l'arbre, criterion :", ['friedman_mse', 'squared_error', 'absolute_error', 'poisson'])
+        num_min_samples_split=st.slider("Choisissez le nombre minimum d'échantillons requis pour diviser un nœud interne, min_samples_split : ", 2, 100, 100)  
+        num_min_samples_leaf=st.slider("Choisissez le nombre minimum d'échantillons requis pour être à une feuille, min_samples_leaf : ", 1, 100, 100)  
+        num_min_weight_fraction_leaf=st.slider("Choisissez la fraction minimale du poids total des échantillons (pondérés) requise pour être à une feuille, min_weight_fraction_leaf : ", 0.0, 0.5, 0.5)  
         num_max_features=st.radio("Choisissez le nombre de caractéristiques à considérer lors de la recherche de la meilleure division, max_features :", ['sqrt', 'log2', 'auto', None])
 
-        rf = RandomForestRegressor(n_estimators=num_n_estimators, criterion=num_criterion, min_samples_split=num_min_samples_split,
-                                   min_samples_leaf=num_min_samples_leaf, min_weight_fraction_leaf=num_min_weight_fraction_leaf, max_features=num_max_features)
-
+        pipeline = make_pipeline(
+        StandardScaler(),
+        MinMaxScaler(),
+        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
+        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        VarianceThreshold(threshold=0.1), 
+        RandomForestRegressor(n_estimators=num_n_estimators, criterion=num_criterion, min_samples_split=num_min_samples_split,
+                                   min_samples_leaf=num_min_samples_leaf, min_weight_fraction_leaf=num_min_weight_fraction_leaf, 
+                                   max_features=num_max_features))
+        
         set_param_recursive(pipeline.steps, 'random_state', 42)
-        rf.fit(X_train, y_train)
-        score_p = rf.score(X_test, y_test)
-        y_pred = rf.predict(X_test)
+        pipeline.fit(X_train, y_train)
+        score_p = pipeline.score(X_test, y_test)
+        y_pred = pipeline.predict(X_test)
         r2 = r2_score(y_test, y_pred)
         mse = mean_squared_error(y_test, y_pred)
         mae = mean_absolute_error(y_test, y_pred)
@@ -393,20 +409,27 @@ def get_score(model):
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
     
     if model == models[3]:
-        num_alpha=st.slider("Choisissez le paramètre de régularisation, alpha :", 0.0, 20.0, 1.0)
-        num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [True, False])
+        num_alpha=st.slider("Choisissez le paramètre de régularisation, alpha :", 0.0, 20.0, 17.0)
+        num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [False, True])
         num_precompute=st.radio("Utilise une version de précalcul pour la matrice X, precompute :", [True, False])  
         num_copy_X=st.radio("Choisissez copy_X :", [True, False])      
-        num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 10000, 10000)
+        num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 10000, 188)
         num_positive=st.radio("Restreint les coefficients à être positifs, positive :", [True, False])         
-        num_selection=st.radio("Choisissez la méthode utilisée pour sélectionner les variables dans le modèle :", ['cyclic', 'random'])
-        
-        lass=Lasso(alpha=num_alpha, fit_intercept=num_fit_intercept, precompute=num_precompute, 
-                   copy_X=num_copy_X, max_iter=num_max_iter, positive=num_positive , selection=num_selection)
+        num_selection=st.radio("Choisissez la méthode utilisée pour sélectionner les variables dans le modèle :", ['random', 'cyclic'])
 
-        lass.fit(X_train, y_train)
-        score_p = lass.score(X_test, y_test)
-        y_pred = lass.predict(X_test)
+        pipeline = make_pipeline(
+        StandardScaler(),
+        MinMaxScaler(),
+        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
+        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        VarianceThreshold(threshold=0.1), 
+        Lasso(alpha=num_alpha, fit_intercept=num_fit_intercept, precompute=num_precompute, 
+                   copy_X=num_copy_X, max_iter=num_max_iter, positive=num_positive , selection=num_selection))
+        
+        set_param_recursive(pipeline.steps, 'random_state', 42)
+        pipeline.fit(X_train, y_train)
+        score_p = pipeline.score(X_test, y_test)
+        y_pred = pipeline.predict(X_test)        
         r2 = r2_score(y_test, y_pred)
         mse = mean_squared_error(y_test, y_pred)
         mae = mean_absolute_error(y_test, y_pred)
@@ -425,34 +448,32 @@ def get_score(model):
         plt.xlabel('Predicted Values')
         plt.ylabel('Actual Values')
         plt.title('Lasso Performance \n R-squared score: {:.2f}'.format(r2))
-        plt.show()
-
-        # Create the coefficients plot
-        coef = pd.Series(lass.coef_, index = X_train.columns)
-        imp_coef = pd.concat([coef.sort_values().head(10),
-                            coef.sort_values().tail(10)])
-        plt.rcParams['figure.figsize'] = (8.0, 10.0)
-        imp_coef.plot(kind = "barh")
-        plt.title("Coefficients in the Lasso Model")
         st.pyplot(fig)
-        
+
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
 
     if model == models[4]:
                       
-        num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 10000, 10000)
-        num_C=st.slider("Choisissez la force de régularisation, C :", 0.1, 1000.0, 1.0)
-        num_epsilon=st.slider("Choisissez la marge de tolérance de l'erreur, epsilon :", 0.1, 1000000.0, 0.1)
-        num_loss=st.radio("Choisissez la fonction de perte utilisée pour optimiser le modèle, loss :", ['epsilon_insensitive', 'squared_epsilon_insensitive', 'huber'])
-        num_dual=st.radio("Résout le problème dual de la formulation SVM, dual :", [True, False])  
-        num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [True, False])  
-        
-        line=LinearSVR(C=num_C, epsilon=num_epsilon, loss=num_loss, max_iter=num_max_iter,
-                       dual=num_dual, fit_intercept=num_fit_intercept)
+        num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 1000, 543)
+        num_C=st.slider("Choisissez la force de régularisation, C :", 0.1, 1000.0, 2.8)
+        num_epsilon=st.slider("Choisissez la marge de tolérance de l'erreur, epsilon :", 0.1, 1000000.0, 1.9)
+        num_loss=st.radio("Choisissez la fonction de perte utilisée pour optimiser le modèle, loss :", ['squared_epsilon_insensitive', 'epsilon_insensitive', 'huber'])
+        num_dual=st.radio("Résout le problème dual de la formulation SVM, dual :", [False, True])  
+        num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [False, True])  
 
-        line.fit(X_train, y_train)
-        score_p = line.score(X_test, y_test)
-        y_pred = line.predict(X_test)
+        pipeline = make_pipeline(
+        StandardScaler(),
+        MinMaxScaler(),
+        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
+        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        VarianceThreshold(threshold=0.1), 
+        LinearSVR(C=num_C, epsilon=num_epsilon, loss=num_loss, max_iter=num_max_iter,
+                       dual=num_dual, fit_intercept=num_fit_intercept))
+        
+        set_param_recursive(pipeline.steps, 'random_state', 42)
+        pipeline.fit(X_train, y_train)
+        score_p = pipeline.score(X_test, y_test)
+        y_pred = pipeline.predict(X_test)         
         r2 = r2_score(y_test, y_pred)
         mse = mean_squared_error(y_test, y_pred)
         mae = mean_absolute_error(y_test, y_pred)
@@ -486,20 +507,28 @@ def get_score(model):
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae 
 
     if model == models[5]:
-        num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [True, False])  
-        num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 10000, 10000)
-        num_normalize=st.radio("Normalise les variables explicatives, normalize :", [True, False])  
+        num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [False, True])  
+        num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 1000, 181)
+        num_normalize=st.radio("Normalise les variables explicatives, normalize :", [False, True])  
         num_precompute=st.radio("Utilise une version de précalcul pour la matrice X, precompute :", [True, False])  
-        num_cv=st.slider("Nombre de folds pour la validation croisée, CV :", 1, 50, 10)
-        num_n_alpha=st.slider("Nombre maximal de valeurs de l'hyperparamètre alpha à tester, n_alphas :", 1, 10000, 1000)
+        num_cv=st.slider("Nombre de folds pour la validation croisée, CV :", 1, 20, 15)
+        num_n_alpha=st.slider("Nombre maximal de valeurs de l'hyperparamètre alpha à tester, n_alphas :", 1, 1000, 151)
+        num_n_jobs=st.slider("Choisissez le nombre de n_jobs : ", -1, 30, 23)        
         num_copy_X=st.radio("Choisissez copy_X :", [True, False])      
-                
-        lassCV=LassoLarsCV(fit_intercept=num_fit_intercept,max_iter=num_max_iter, normalize=num_normalize, precompute=num_precompute,
-                           cv=num_cv, max_n_alphas=num_n_alpha, copy_X=num_copy_X)
 
-        lassCV.fit(X_train, y_train)
-        score_p = lassCV.score(X_test, y_test)
-        y_pred = lassCV.predict(X_test)
+        pipeline = make_pipeline(
+        StandardScaler(),
+        MinMaxScaler(),
+        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
+        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        VarianceThreshold(threshold=0.1), 
+        LassoLarsCV(fit_intercept=num_fit_intercept,max_iter=num_max_iter, normalize=num_normalize, precompute=num_precompute,
+                           cv=num_cv, max_n_alphas=num_n_alpha,n_jobs=num_n_jobs, copy_X=num_copy_X))
+        
+        set_param_recursive(pipeline.steps, 'random_state', 42)
+        pipeline.fit(X_train, y_train)
+        score_p = pipeline.score(X_test, y_test)
+        y_pred = pipeline.predict(X_test)                  
         r2 = r2_score(y_test, y_pred)
         mse = mean_squared_error(y_test, y_pred)
         mae = mean_absolute_error(y_test, y_pred)
@@ -533,10 +562,14 @@ def get_score(model):
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
 
 if page == pages[3]:
+
     st.header("Choix des paramètres pour le modèle")
     st.image('param.jpg')
     model = st.selectbox("Recherche des meilleurs paramètres", models)
-    st.write("Hyperparamètres obtenus :", get_param(model))    
+    study = optuna.create_study(direction='minimize')
+    study.optimize(lambda trial: get_param(trial, model), n_trials=100)
+    st.write("Meilleurs Hyperparamètres  :", study.best_params)    
+    st.write("Meilleurs MSE  :", study.best_value)  
     
     
 if page == pages[4]:
