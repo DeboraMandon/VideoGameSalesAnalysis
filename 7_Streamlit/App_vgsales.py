@@ -22,7 +22,7 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 import numpy as np
 import re
 import joblib
-import optuna
+from joblib import dump, load
 
 df= pd.read_csv("gaming_total_v2.csv")
 df= df.drop('Unnamed: 0', axis=1)
@@ -183,88 +183,104 @@ X=df_gd.drop('Global_Sales', axis=1)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y,  test_size=0.2, random_state=42)
 
-def get_param(trial, model):
+
+def get_param(model):
     if model == models[0]:
-        fit_intercept = trial.suggest_categorical('fit_intercept', [True, False])
-        n_jobs = trial.suggest_uniform('n_jobs', -1, 10)
-        copy_X = trial.suggest_categorical('copy_X', [True, False])
-        positive = trial.suggest_categorical('positive', [True, False])
-        lr=LinearRegression()
-        lr.fit(X_train, y_train)
-        y_pred = lr.predict(X_test)
+        best_params = load('best_params_lr.joblib') 
+        best_score = load('best_score_lr.joblib')
+        best_model=LinearRegression(**best_params)
+        best_model.fit(X_train, y_train)
+        y_pred = best_model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
-        return mse
+        score=best_model.score(X_test, y_test)
+        st.markdown("Meilleurs paramètres de LinearRegressor : ")
+        st.write(best_params)
+        st.markdown("Score : ")
+        st.write(score)
+        st.markdown("MSE : ")
+        st.write(mse)
+        return("Paramètres:", best_params, "Score:", score, "MSE", mse)
 
     if model == models[1]:
-        weights = trial.suggest_categorical('weights', ['uniform', 'distance'])
-        n_neighbors = trial.suggest_uniform('n_neighbors', 1, 20)
-        algorithm = trial.suggest_categorical('algorithm', ['auto', 'ball_tree', 'kd_tree', 'brute'])
-        leaf_size = trial.suggest_categorical('leaf_size', [1, 100])
-        p = trial.suggest_categorical('p', [1, 20])
-        metric = trial.suggest_categorical('metric', ['minkowski', 'euclidean', 'manhattan', 'chebyshev'])
-        knn=KNeighborsRegressor()
-        knn.fit(X_train, y_train)
-        y_pred = knn.predict(X_test)
+        best_params = load('best_params_knn.joblib') 
+        best_score = load('best_score_knn.joblib')
+        best_model=KNeighborsRegressor(**best_params)
+        best_model.fit(X_train, y_train)
+        y_pred = best_model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
-        return mse
+        score=best_model.score(X_test, y_test)
+        st.markdown("Meilleurs paramètres de KNeighborsRegressor : ")
+        st.write(best_params)
+        st.markdown("Score : ")
+        st.write(score)
+        st.markdown("MSE : ")
+        st.write(mse)
+        return("Paramètres:", best_params, "Score:", score, "MSE", mse)
             
     if model == models[2]:
-        n_estimators = trial.suggest_uniform('n_estimators', 1, 100)
-        criterion = trial.suggest_categorical('criterion', ['squared_error', 'absolute_error', 'friedman_mse', 'poisson'])
-        min_samples_split = trial.suggest_categorical('min_samples_split', [2, 100])
-        min_samples_leaf = trial.suggest_categorical('min_samples_leaf', [2, 100])
-        min_weight_fraction_leaf = trial.suggest_categorical('min_weight_fraction_leaf', [0.0, 10])
-        max_features = trial.suggest_categorical('max_features', ['sqrt', 'log2', 'auto', None])               
-        rf=RandomForestRegressor()
-        rf.fit(X_train, y_train)
-        y_pred = rf.predict(X_test)
+        best_params = load('best_params_rf.joblib') 
+        best_score = load('best_score_rf.joblib')
+        best_model=RandomForestRegressor(**best_params)
+        best_model.fit(X_train, y_train)
+        y_pred = best_model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
-        return mse
-        
+        score=best_model.score(X_test, y_test)
+        st.markdown("Meilleurs paramètres de RandomForestRegressor : ")
+        st.write(best_params)
+        st.markdown("Score : ")
+        st.write(score)
+        st.markdown("MSE : ")
+        st.write(mse)   
+        return("Paramètres:", best_params, "Score:", score, "MSE", mse)
+    
     if model == models[3]:
-        alpha = trial.suggest_uniform('alpha', 0.1, 20) 
-        fit_intercept = trial.suggest_categorical('fit_intercept', [True, False])
-        precompute = trial.suggest_categorical('precompute', [True, False])
-        copy_X = trial.suggest_categorical('copy_X', [True, False])
-        max_iter = trial.suggest_uniform('max_iter', 1, 1000) 
-        positive = trial.suggest_categorical('positive', [True, False])
-        selection = trial.suggest_categorical('selection', ['cyclic', 'random'])
-        lass=Lasso()
-        lass.fit(X_train, y_train)
-        y_pred = lass.predict(X_test)
+        best_params = load('best_params_lass.joblib') 
+        best_score = load('best_score_lass.joblib')
+        best_model=Lasso(**best_params)
+        best_model.fit(X_train, y_train)
+        y_pred = best_model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
-        return mse
-        
+        score=best_model.score(X_test, y_test)
+        st.markdown("Meilleurs paramètres de Lasso : ")
+        st.write(best_params)
+        st.markdown("Score : ")
+        st.write(score)
+        st.markdown("MSE : ")
+        st.write(mse)   
+        return("Paramètres:", best_params, "Score:", score, "MSE", mse)
+    
     if model == models[4]:
-        C = trial.suggest_uniform('C', 0.0, 10) 
-        loss = trial.suggest_categorical('loss', ['epsilon_insensitive', 'squared_epsilon_insensitive'])
-        dual = trial.suggest_categorical('dual', [True, False])
-        fit_intercept = trial.suggest_categorical('fit_intercept', [True, False])     
-        intercept_scaling = trial.suggest_uniform('intercept_scaling', 1, 100) 
-        epsilon = trial.suggest_uniform('epsilon', 0.0, 10)   
-        max_iter = trial.suggest_uniform('max_iter', 1, 1000) 
-        line=LinearSVR()
-        line.fit(X_train, y_train)
-        y_pred = line.predict(X_test)
+        best_params = load('best_params_line.joblib') 
+        best_score = load('best_score_line.joblib')
+        best_model=LinearSVR(**best_params)
+        best_model.fit(X_train, y_train)
+        y_pred = best_model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
-        return mse
-        
+        score=best_model.score(X_test, y_test)
+        st.markdown("Meilleurs paramètres de LinearSVR : ")
+        st.write(best_params)
+        st.markdown("Score : ")
+        st.write(score)
+        st.markdown("MSE : ")
+        st.write(mse)   
+        return("Paramètres:", best_params, "Score:", score, "MSE", mse)
+    
     if model == models[5]:
-        fit_intercept = trial.suggest_categorical('fit_intercept', [True, False])     
-        max_iter = trial.suggest_uniform('max_iter', 1, 1000)
-        normalize = trial.suggest_categorical('normalize', [True, False]) 
-        precompute = trial.suggest_categorical('precompute', [True, False]) 
-        cv = trial.suggest_uniform('cv', 1, 50)
-        max_n_alphas = trial.suggest_uniform('max_n_alphas', 1, 1000)
-        n_jobs = trial.suggest_uniform('n_jobs', 1, 100)
-        copy_X = trial.suggest_categorical('copy_X', [True, False])
-        lassCV=LassoLarsCV()
-        lassCV.fit(X_train, y_train)
-        y_pred = lassCV.predict(X_test)
+        best_params = load('best_params_lasso_cv.joblib') 
+        best_score = load('best_score_lasso_cv.joblib')
+        best_model=LassoLarsCV(**best_params)
+        best_model.fit(X_train, y_train)
+        y_pred = best_model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
-        return mse
-        
-               
+        score=best_model.score(X_test, y_test)
+        st.markdown("Meilleurs paramètres de LassoLarsCV : ")
+        st.write(best_params)
+        st.markdown("Score : ")
+        st.write(score)
+        st.markdown("MSE : ")
+        st.write(mse)  
+        return("Paramètres:", best_params, "Score:", score, "MSE", mse)
+                                                   
 def get_score(model):
     if model == models[0]:
         num_intercept=st.radio("Choisissez un fit_intercept :", [True, False])
@@ -562,16 +578,12 @@ def get_score(model):
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
 
 if page == pages[3]:
-
     st.header("Choix des paramètres pour le modèle")
     st.image('param.jpg')
     model = st.selectbox("Recherche des meilleurs paramètres", models)
-    study = optuna.create_study(direction='minimize')
-    study.optimize(lambda trial: get_param(trial, model), n_trials=100)
-    st.write("Meilleurs Hyperparamètres  :", study.best_params)    
-    st.write("Meilleurs MSE  :", study.best_value)  
-    
-    
+    st.write("Meilleurs hyperparamètres :", get_param(model))
+
+
 if page == pages[4]:
     st.title("Entrainement des modèles")
     st.header("Choix du modèle")
@@ -579,6 +591,3 @@ if page == pages[4]:
     st.image('ml.jpg')
     st.header('Réglage des paramètres')
     st.write("Scores obtenu :", get_score(model))
-    
-    
-    
