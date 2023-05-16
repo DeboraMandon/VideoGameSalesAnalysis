@@ -10,6 +10,9 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.linear_model import Lasso
 from sklearn.ensemble import ExtraTreesRegressor, RandomForestRegressor
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVR
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import AdaBoostRegressor
 from sklearn.svm import LinearSVR
 from sklearn.linear_model import LassoLarsCV
 from sklearn.feature_selection import VarianceThreshold
@@ -36,7 +39,7 @@ st.sidebar.image('image-jeux-video.jpg')
 st.sidebar.subheader("Navigation")
 
 pages=['Présentation du projet', 'Dataframe', 'Data Visualisation', 'Hyperparamètres', 'Modélisation']
-models= ["Regression Linéaire", "KNN", "Random forest", 'Lasso', 'LinearSVR', 'LassoLarsCV']
+models= ["Regression Linéaire", "KNN", "Random forest", 'Lasso', 'LinearSVR', 'LassoLarsCV', 'SVR', 'DecisionTreeRegressor', 'AdaBoostRegressor']
 page=st.sidebar.radio("Choisissez votre page", pages)
 
 
@@ -186,108 +189,159 @@ X_train, X_test, y_train, y_test = train_test_split(X, y,  test_size=0.2, random
 
 def get_param(model):
     if model == models[0]:
-        best_params = load('best_params_lr.joblib') 
+        best_params_lr = load('best_params_lr.joblib') 
         best_score = load('best_score_lr.joblib')
-        best_model=LinearRegression(**best_params)
+        best_model=LinearRegression(**best_params_lr)
         best_model.fit(X_train, y_train)
         y_pred = best_model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
         score=best_model.score(X_test, y_test)
         st.markdown("Meilleurs paramètres de LinearRegressor : ")
-        st.write(best_params)
+        st.write(best_params_lr)
         st.markdown("Score : ")
         st.write(score)
         st.markdown("MSE : ")
         st.write(mse)
-        return("Paramètres:", best_params, "Score:", score, "MSE", mse)
+        return("Paramètres:", best_params_lr, "Score:", score, "MSE", mse)
 
     if model == models[1]:
-        best_params = load('best_params_knn.joblib') 
+        best_params_knn = load('best_params_knn.joblib') 
         best_score = load('best_score_knn.joblib')
-        best_model=KNeighborsRegressor(**best_params)
+        best_model=KNeighborsRegressor(**best_params_knn)
         best_model.fit(X_train, y_train)
         y_pred = best_model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
         score=best_model.score(X_test, y_test)
         st.markdown("Meilleurs paramètres de KNeighborsRegressor : ")
-        st.write(best_params)
+        st.write(best_params_knn)
         st.markdown("Score : ")
         st.write(score)
         st.markdown("MSE : ")
         st.write(mse)
-        return("Paramètres:", best_params, "Score:", score, "MSE", mse)
+        return("Paramètres:", best_params_knn, "Score:", score, "MSE", mse)
             
     if model == models[2]:
-        best_params = load('best_params_rf.joblib') 
+        best_params_rf = load('best_params_rf.joblib') 
         best_score = load('best_score_rf.joblib')
-        best_model=RandomForestRegressor(**best_params)
+        best_model=RandomForestRegressor(**best_params_rf)
         best_model.fit(X_train, y_train)
         y_pred = best_model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
         score=best_model.score(X_test, y_test)
         st.markdown("Meilleurs paramètres de RandomForestRegressor : ")
-        st.write(best_params)
+        st.write(best_params_rf)
         st.markdown("Score : ")
         st.write(score)
         st.markdown("MSE : ")
         st.write(mse)   
-        return("Paramètres:", best_params, "Score:", score, "MSE", mse)
+        return("Paramètres:", best_params_rf, "Score:", score, "MSE", mse)
     
     if model == models[3]:
-        best_params = load('best_params_lass.joblib') 
+        best_params_lass = load('best_params_lass.joblib') 
         best_score = load('best_score_lass.joblib')
-        best_model=Lasso(**best_params)
+        best_model=Lasso(**best_params_lass)
         best_model.fit(X_train, y_train)
         y_pred = best_model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
         score=best_model.score(X_test, y_test)
         st.markdown("Meilleurs paramètres de Lasso : ")
-        st.write(best_params)
+        st.write(best_params_lass)
         st.markdown("Score : ")
         st.write(score)
         st.markdown("MSE : ")
         st.write(mse)   
-        return("Paramètres:", best_params, "Score:", score, "MSE", mse)
+        return("Paramètres:", best_params_lass, "Score:", score, "MSE", mse)
     
     if model == models[4]:
-        best_params = load('best_params_line.joblib') 
+        best_params_line = load('best_params_line.joblib') 
         best_score = load('best_score_line.joblib')
-        best_model=LinearSVR(**best_params)
+        best_model=LinearSVR(**best_params_line)
         best_model.fit(X_train, y_train)
         y_pred = best_model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
         score=best_model.score(X_test, y_test)
         st.markdown("Meilleurs paramètres de LinearSVR : ")
-        st.write(best_params)
+        st.write(best_params_line)
         st.markdown("Score : ")
         st.write(score)
         st.markdown("MSE : ")
         st.write(mse)   
-        return("Paramètres:", best_params, "Score:", score, "MSE", mse)
+        return("Paramètres:", best_params_line, "Score:", score, "MSE", mse)
     
     if model == models[5]:
-        best_params = load('best_params_lasso_cv.joblib') 
+        best_params_lasso_cv = load('best_params_lasso_cv.joblib') 
         best_score = load('best_score_lasso_cv.joblib')
-        best_model=LassoLarsCV(**best_params)
+        best_model=LassoLarsCV(**best_params_lasso_cv)
         best_model.fit(X_train, y_train)
         y_pred = best_model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
         score=best_model.score(X_test, y_test)
         st.markdown("Meilleurs paramètres de LassoLarsCV : ")
-        st.write(best_params)
+        st.write(best_params_lasso_cv)
         st.markdown("Score : ")
         st.write(score)
         st.markdown("MSE : ")
         st.write(mse)  
-        return("Paramètres:", best_params, "Score:", score, "MSE", mse)
-                                                   
+        return("Paramètres:", best_params_lasso_cv, "Score:", score, "MSE", mse)
+
+    if model == models[6]:
+        best_params_svr = load('best_params_svr.joblib') 
+        best_score = load('best_score_svr.joblib')
+        best_model=SVR(**best_params_svr)
+        best_model.fit(X_train, y_train)
+        y_pred = best_model.predict(X_test)
+        mse = mean_squared_error(y_test, y_pred)
+        score=best_model.score(X_test, y_test)
+        st.markdown("Meilleurs paramètres de SVR : ")
+        st.write(best_params_svr)
+        st.markdown("Score : ")
+        st.write(score)
+        st.markdown("MSE : ")
+        st.write(mse)
+        return("Paramètres:", best_params_svr, "Score:", score, "MSE", mse)
+    
+    if model == models[7]:
+        best_params_dt = load('best_params_dt.joblib') 
+        best_score = load('best_score_dt.joblib')
+        best_model=DecisionTreeRegressor(**best_params_dt)
+        best_model.fit(X_train, y_train)
+        y_pred = best_model.predict(X_test)
+        mse = mean_squared_error(y_test, y_pred)
+        score=best_model.score(X_test, y_test)
+        st.markdown("Meilleurs paramètres de DecisionTreeRegressor : ")
+        st.write(best_params_dt)
+        st.markdown("Score : ")
+        st.write(score)
+        st.markdown("MSE : ")
+        st.write(mse)
+        return("Paramètres:", best_params_dt, "Score:", score, "MSE", mse)
+    
+    if model == models[8]:
+        best_params_ab = load('best_params_ab.joblib') 
+        best_score = load('best_score_ab.joblib')
+        best_model=AdaBoostRegressor(**best_params_ab)
+        best_model.fit(X_train, y_train)
+        y_pred = best_model.predict(X_test)
+        mse = mean_squared_error(y_test, y_pred)
+        score=best_model.score(X_test, y_test)
+        st.markdown("Meilleurs paramètres de AdaBoostRegressor : ")
+        st.write(best_params_ab)
+        st.markdown("Score : ")
+        st.write(score)
+        st.markdown("MSE : ")
+        st.write(mse)
+        return("Paramètres:", best_params_ab, "Score:", score, "MSE", mse)  
+    
+                                                     
 def get_score(model):
     if model == models[0]:
         num_intercept=st.radio("Choisissez un fit_intercept :", [True, False])
         num_copy_X=st.radio("Choisissez copy_X :", [True, False])
         num_n_jobs=st.slider("Choisissez le nombre de n_jobs : ", -1, 10, -1)
         num_positive=st.radio("Choisissez le positive :", [False, True])
-
+        
+        best_params = load('best_params_lr.joblib')
+        
         pipeline = make_pipeline(
         StandardScaler(),
         MinMaxScaler(),
@@ -295,14 +349,15 @@ def get_score(model):
         StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
         VarianceThreshold(threshold=0.1), 
         LinearRegression(fit_intercept=num_intercept, copy_X=num_copy_X, n_jobs=num_n_jobs, positive=num_positive))
-
-        set_param_recursive(pipeline.steps, 'random_state', 42)
+        
+        #set_param_recursive(pipeline.steps, 'random_state', 42)
         pipeline.fit(X_train, y_train)
         score_p = pipeline.score(X_test, y_test)
         y_pred = pipeline.predict(X_test)
         r2 = r2_score(y_test, y_pred)
         mse = mean_squared_error(y_test, y_pred)
         mae = mean_absolute_error(y_test, y_pred)
+
         st.markdown("Score : ")
         st.write(score_p)
         st.markdown("R2 : ")
@@ -311,7 +366,8 @@ def get_score(model):
         st.write(mse)
         st.markdown("MAE : ")
         st.write(mae)
-        
+
+                
         fig=plt.figure()
         plt.scatter(y_pred, y_test)
         plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], '--', color='red')
@@ -320,8 +376,7 @@ def get_score(model):
         plt.title('Linear Regression Performance')
         st.pyplot(fig)
                 
-        return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
-        
+        return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae
         
     if model == models[1]:
         
@@ -341,7 +396,7 @@ def get_score(model):
         KNeighborsRegressor(n_neighbors=num_n_neighbors, weights=num_weights, metric=num_metrics, algorithm=num_algos, 
                                 leaf_size=num_leaf_size, p=num_p))
         
-        set_param_recursive(pipeline.steps, 'random_state', 42)
+        #set_param_recursive(pipeline.steps, 'random_state', 42)
         pipeline.fit(X_train, y_train)
         score_p = pipeline.score(X_test, y_test)
         y_pred = pipeline.predict(X_test)
@@ -386,7 +441,7 @@ def get_score(model):
                                    min_samples_leaf=num_min_samples_leaf, min_weight_fraction_leaf=num_min_weight_fraction_leaf, 
                                    max_features=num_max_features))
         
-        set_param_recursive(pipeline.steps, 'random_state', 42)
+        #set_param_recursive(pipeline.steps, 'random_state', 42)
         pipeline.fit(X_train, y_train)
         score_p = pipeline.score(X_test, y_test)
         y_pred = pipeline.predict(X_test)
@@ -442,7 +497,7 @@ def get_score(model):
         Lasso(alpha=num_alpha, fit_intercept=num_fit_intercept, precompute=num_precompute, 
                    copy_X=num_copy_X, max_iter=num_max_iter, positive=num_positive , selection=num_selection))
         
-        set_param_recursive(pipeline.steps, 'random_state', 42)
+        #set_param_recursive(pipeline.steps, 'random_state', 42)
         pipeline.fit(X_train, y_train)
         score_p = pipeline.score(X_test, y_test)
         y_pred = pipeline.predict(X_test)        
@@ -486,7 +541,7 @@ def get_score(model):
         LinearSVR(C=num_C, epsilon=num_epsilon, loss=num_loss, max_iter=num_max_iter,
                        dual=num_dual, fit_intercept=num_fit_intercept))
         
-        set_param_recursive(pipeline.steps, 'random_state', 42)
+        #set_param_recursive(pipeline.steps, 'random_state', 42)
         pipeline.fit(X_train, y_train)
         score_p = pipeline.score(X_test, y_test)
         y_pred = pipeline.predict(X_test)         
@@ -541,7 +596,7 @@ def get_score(model):
         LassoLarsCV(fit_intercept=num_fit_intercept,max_iter=num_max_iter, normalize=num_normalize, precompute=num_precompute,
                            cv=num_cv, max_n_alphas=num_n_alpha,n_jobs=num_n_jobs, copy_X=num_copy_X))
         
-        set_param_recursive(pipeline.steps, 'random_state', 42)
+        #set_param_recursive(pipeline.steps, 'random_state', 42)
         pipeline.fit(X_train, y_train)
         score_p = pipeline.score(X_test, y_test)
         y_pred = pipeline.predict(X_test)                  
@@ -565,16 +620,138 @@ def get_score(model):
         plt.title('LassoLarsCV Performance \n R-squared score: {:.2f}'.format(r2))
         st.pyplot(fig)
 
-        # Create the coefficients plot
-        coef = pd.Series(lassCV.coef_, index = X_train.columns)
-        imp_coef = pd.concat([coef.sort_values().head(10),
-                            coef.sort_values().tail(10)])
-        fig2=plt.figure()
-        plt.rcParams['figure.figsize'] = (8.0, 10.0)
-        imp_coef.plot(kind = "barh")
-        plt.title("Coefficients in the LassoLarsCV Model")
-        st.pyplot(fig2)
+        return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
+    
+    if model == models[6]:
+        #num_intercept=st.radio("Choisissez un fit_intercept :", [True, False])
+        #num_copy_X=st.radio("Choisissez copy_X :", [True, False])
+        #num_n_jobs=st.slider("Choisissez le nombre de n_jobs : ", -1, 10, -1)
+        #num_positive=st.radio("Choisissez le positive :", [False, True])
+        
+        best_params = load('best_params_svr.joblib')
+        
+        pipeline = make_pipeline(
+        StandardScaler(),
+        MinMaxScaler(),
+        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
+        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        VarianceThreshold(threshold=0.1), 
+        SVR())
+        
+        #set_param_recursive(pipeline.steps, 'random_state', 42)
+        pipeline.fit(X_train, y_train)
+        score_p = pipeline.score(X_test, y_test)
+        y_pred = pipeline.predict(X_test)
+        r2 = r2_score(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
 
+        st.markdown("Score : ")
+        st.write(score_p)
+        st.markdown("R2 : ")
+        st.write(r2)
+        st.markdown("MSE : ")
+        st.write(mse)
+        st.markdown("MAE : ")
+        st.write(mae)
+
+                
+        fig=plt.figure()
+        plt.scatter(y_pred, y_test)
+        plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], '--', color='red')
+        plt.xlabel('Predicted Values')
+        plt.ylabel('Actual Values')
+        plt.title('Linear Regression Performance')
+        st.pyplot(fig)
+                
+        return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae, "best params :", best_params  
+    
+    if model == models[7]:
+        #num_intercept=st.radio("Choisissez un fit_intercept :", [True, False])
+        #num_copy_X=st.radio("Choisissez copy_X :", [True, False])
+        #num_n_jobs=st.slider("Choisissez le nombre de n_jobs : ", -1, 10, -1)
+        #num_positive=st.radio("Choisissez le positive :", [False, True])
+        
+        best_params = load('best_params_dt.joblib')
+        
+        pipeline = make_pipeline(
+        StandardScaler(),
+        MinMaxScaler(),
+        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
+        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        VarianceThreshold(threshold=0.1), 
+        DecisionTreeRegressor())
+        
+        #set_param_recursive(pipeline.steps, 'random_state', 42)
+        pipeline.fit(X_train, y_train)
+        score_p = pipeline.score(X_test, y_test)
+        y_pred = pipeline.predict(X_test)
+        r2 = r2_score(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
+
+        st.markdown("Score : ")
+        st.write(score_p)
+        st.markdown("R2 : ")
+        st.write(r2)
+        st.markdown("MSE : ")
+        st.write(mse)
+        st.markdown("MAE : ")
+        st.write(mae)
+
+                
+        fig=plt.figure()
+        plt.scatter(y_pred, y_test)
+        plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], '--', color='red')
+        plt.xlabel('Predicted Values')
+        plt.ylabel('Actual Values')
+        plt.title('Linear Regression Performance')
+        st.pyplot(fig)
+                
+        return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae
+    
+    if model == models[8]:
+        #num_intercept=st.radio("Choisissez un fit_intercept :", [True, False])
+        #num_copy_X=st.radio("Choisissez copy_X :", [True, False])
+        #num_n_jobs=st.slider("Choisissez le nombre de n_jobs : ", -1, 10, -1)
+        #num_positive=st.radio("Choisissez le positive :", [False, True])
+        
+        best_params = load('best_params_ab.joblib')
+        
+        pipeline = make_pipeline(
+        StandardScaler(),
+        MinMaxScaler(),
+        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
+        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        VarianceThreshold(threshold=0.1), 
+        AdaBoostRegressor())
+        
+        #set_param_recursive(pipeline.steps, 'random_state', 42)
+        pipeline.fit(X_train, y_train)
+        score_p = pipeline.score(X_test, y_test)
+        y_pred = pipeline.predict(X_test)
+        r2 = r2_score(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
+
+        st.markdown("Score : ")
+        st.write(score_p)
+        st.markdown("R2 : ")
+        st.write(r2)
+        st.markdown("MSE : ")
+        st.write(mse)
+        st.markdown("MAE : ")
+        st.write(mae)
+
+                
+        fig=plt.figure()
+        plt.scatter(y_pred, y_test)
+        plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], '--', color='red')
+        plt.xlabel('Predicted Values')
+        plt.ylabel('Actual Values')
+        plt.title('Linear Regression Performance')
+        st.pyplot(fig)
+                
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
 
 if page == pages[3]:
@@ -589,5 +766,38 @@ if page == pages[4]:
     st.header("Choix du modèle")
     model = st.selectbox("Choisissez votre modèle", models)
     st.image('ml.jpg')
-    st.header('Réglage des paramètres')
-    st.write("Scores obtenu :", get_score(model))
+    if model == models[0]:
+        best_params = load('best_params_lr.joblib')
+        st.write('Meilleurs hyperparamètres pour le modèle:', best_params)
+        st.header('Réglage des paramètres')
+        st.write("Scores obtenu :", get_score(model))
+
+    if model == models[1]:
+        best_params = load('best_params_knn.joblib')
+        st.write('Meilleurs hyperparamètres pour le modèle:', best_params)
+        st.header('Réglage des paramètres')
+        st.write("Scores obtenu :", get_score(model))
+
+    if model == models[2]:
+        best_params = load('best_params_rf.joblib')
+        st.write('Meilleurs hyperparamètres pour le modèle:', best_params)
+        st.header('Réglage des paramètres')
+        st.write("Scores obtenu :", get_score(model))
+        
+    if model == models[3]:
+        best_params = load('best_params_lass.joblib')
+        st.write('Meilleurs hyperparamètres pour le modèle:', best_params)
+        st.header('Réglage des paramètres')
+        st.write("Scores obtenu :", get_score(model))
+        
+    if model == models[4]:
+        best_params = load('best_params_line.joblib')
+        st.write('Meilleurs hyperparamètres pour le modèle:', best_params)
+        st.header('Réglage des paramètres')
+        st.write("Scores obtenu :", get_score(model))
+        
+    if model == models[5]:
+        best_params = load('best_params_lasso_cv.joblib')
+        st.write('Meilleurs hyperparamètres pour le modèle:', best_params)
+        st.header('Réglage des paramètres')
+        st.write("Scores obtenu :", get_score(model))
