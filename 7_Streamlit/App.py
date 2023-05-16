@@ -32,10 +32,9 @@ df= df.drop('Unnamed: 0', axis=1)
 df_clean=pd.read_csv("df_clean_v2.csv", index_col=0)
 df_gd=pd.get_dummies(df_clean)
 
-
-
 st.sidebar.title("Video Games Sales Analysis")
 st.sidebar.image('image-jeux-video.jpg')
+
 st.sidebar.subheader("Navigation")
 
 pages=['Présentation du projet', 'Dataframe', 'Data Visualisation', 'Hyperparamètres', 'Modélisation']
@@ -46,7 +45,7 @@ page=st.sidebar.radio("Choisissez votre page", pages)
 if page == pages[0]:
     st.title("Video Games Sales Analysis")
     st.header("Machine Learning Project")
-    st.subheader("par Débora Mandon")
+    st.subheader("Auteur : Débora Mandon")
     st.image('image-jeux-video.jpg')
     st.markdown("Pour ce projet il faudra estimer les ventes totales d’un jeu vidéo à l’aide d’informations descriptives comme: \n"
                 "- Le pays d’origine \n"
@@ -64,6 +63,10 @@ if page == pages[0]:
 
 
 if page == pages[1]:
+    if st.sidebar.checkbox("Afficher les données brutes :", False):
+        st.subheader("Jeu de données 'vg_sales' : Echantillon de 100 observations")
+        st.write(df.sample(100))
+    
     st.header("Analyse du Dataframe")
     st.image("analytics.jpg")
     st.markdown("")
@@ -128,7 +131,7 @@ if page == pages[2]:
             "Répartition des 10 catégories les plus représentées par variables catégorielles", "Distribution des variables numériques",
             "Heatmap des variables numériques du Dataframe après PreProcessing"]
 
-    graph=st.radio("Choisissez votre visualisation", graphs)
+    graph=st.sidebar.selectbox("Choisissez votre visualisation", graphs)
 
     if graph == graphs[0]:    
         for i in df.select_dtypes(include=['int64', 'float64']):
@@ -158,14 +161,14 @@ if page == pages[2]:
         st.pyplot(fig2)
 
     if graph == graphs[2]:
-        choices_cat =st.radio("Choisissez les variables catégorielles à étudier", df_clean.select_dtypes(include=['object']).columns)
+        choices_cat =st.sidebar.radio("Choisissez les variables catégorielles à étudier", df_clean.select_dtypes(include=['object']).columns)
         fig3=plt.figure()
         df.select_dtypes(include=['object'])[choices_cat].value_counts()[:10].plot.pie(autopct=lambda x: f'{str(round(x, 2))}%')
         plt.title(f'Répartition de la variable {str(choices_cat)}')
         st.pyplot(fig3)
 
     if graph == graphs[3]:
-        choices_num =st.radio("Choisissez les variables numériques à étudier", df_clean.select_dtypes(include=['int64', 'float64']).columns[:-1])
+        choices_num =st.sidebar.radio("Choisissez les variables numériques à étudier", df_clean.select_dtypes(include=['int64', 'float64']).columns[:-1])
         fig4=plt.figure()
         sns.distplot(df[choices_num], label=choices_num)
         plt.title(f'Histogramme de la variable {str(choices_num)}')
@@ -285,8 +288,8 @@ def get_param(model):
         return("Paramètres:", best_params_lasso_cv, "Score:", score, "MSE", mse)
 
     if model == models[6]:
-        best_params_svr = load('best_params_svr.joblib') 
-        best_score = load('best_score_svr.joblib')
+        best_params_svr = load('best_params_svr .joblib') 
+        best_score = load('best_score_svr .joblib')
         best_model=SVR(**best_params_svr)
         best_model.fit(X_train, y_train)
         y_pred = best_model.predict(X_test)
@@ -344,9 +347,10 @@ def get_score(model):
         
         pipeline = make_pipeline(
         StandardScaler(),
-        MinMaxScaler(),
-        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        #MinMaxScaler(),
+        SelectFwe(#score_func=f_regression, 
+                  alpha=0.009000000000000001),
+        #StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
         VarianceThreshold(threshold=0.1), 
         LinearRegression(fit_intercept=num_intercept, copy_X=num_copy_X, n_jobs=num_n_jobs, positive=num_positive))
         
@@ -367,7 +371,7 @@ def get_score(model):
         st.markdown("MAE : ")
         st.write(mae)
 
-                
+               
         fig=plt.figure()
         plt.scatter(y_pred, y_test)
         plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], '--', color='red')
@@ -379,19 +383,20 @@ def get_score(model):
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae
         
     if model == models[1]:
-        
-        num_n_neighbors=st.slider("Choisissez le nombre de voisins, n_neighbors : ", 1, 50, 11)
-        num_weights=st.radio("Choisissez une fonction de pondération, weights :", ['uniform', 'distance'])
-        num_metrics=st.radio("Choisissez une fonction de distance entre les points, metric :", ['euclidean', 'manhattan', 'chebyshev', 'minkowski'])
+
         num_algos=st.radio("Choisissez une fonction de distance entre les points, algorithm :", ['kd_tree', 'brute', 'auto', 'ball_tree'])
         num_leaf_size=st.slider("Choisissez taille de la feuille de l'arbre, leaf_size : ", 1, 100, 1)        
+        num_metrics=st.radio("Choisissez une fonction de distance entre les points, metric :", ['euclidean', 'manhattan', 'chebyshev', 'minkowski'])
+        num_n_neighbors=st.slider("Choisissez le nombre de voisins, n_neighbors : ", 1, 50, 7)
         num_p=st.slider("Choisissez la taille de p, p : ", 1, 10, 1)  
+        num_weights=st.radio("Choisissez une fonction de pondération, weights :", ['uniform', 'distance'])
                 
         pipeline = make_pipeline(
         StandardScaler(),
-        MinMaxScaler(),
-        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        #MinMaxScaler(),
+        SelectFwe(#score_func=f_regression, 
+                  alpha=0.009000000000000001),
+        #StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
         VarianceThreshold(threshold=0.1), 
         KNeighborsRegressor(n_neighbors=num_n_neighbors, weights=num_weights, metric=num_metrics, algorithm=num_algos, 
                                 leaf_size=num_leaf_size, p=num_p))
@@ -433,10 +438,11 @@ def get_score(model):
 
         pipeline = make_pipeline(
         StandardScaler(),
-        MinMaxScaler(),
-        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
-        VarianceThreshold(threshold=0.1), 
+        #MinMaxScaler(),
+        SelectFwe(#score_func=f_regression, 
+                  alpha=0.009000000000000001),
+        #StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        VarianceThreshold(threshold=0.1),  
         RandomForestRegressor(n_estimators=num_n_estimators, criterion=num_criterion, min_samples_split=num_min_samples_split,
                                    min_samples_leaf=num_min_samples_leaf, min_weight_fraction_leaf=num_min_weight_fraction_leaf, 
                                    max_features=num_max_features))
@@ -480,21 +486,22 @@ def get_score(model):
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
     
     if model == models[3]:
-        num_alpha=st.slider("Choisissez le paramètre de régularisation, alpha :", 0.0, 20.0, 17.0)
-        num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [False, True])
-        num_precompute=st.radio("Utilise une version de précalcul pour la matrice X, precompute :", [True, False])  
+        num_alpha=st.slider("Choisissez le paramètre de régularisation, alpha :", 0.0, 10.0, 17.0)
         num_copy_X=st.radio("Choisissez copy_X :", [True, False])      
-        num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 10000, 188)
+        num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [False, True])
+        num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 10000, 3000)
         num_positive=st.radio("Restreint les coefficients à être positifs, positive :", [True, False])         
+        num_precompute=st.radio("Utilise une version de précalcul pour la matrice X, precompute :", [True, False])  
         num_selection=st.radio("Choisissez la méthode utilisée pour sélectionner les variables dans le modèle :", ['random', 'cyclic'])
 
         pipeline = make_pipeline(
         StandardScaler(),
-        MinMaxScaler(),
-        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        #MinMaxScaler(),
+        SelectFwe(#score_func=f_regression, 
+                  alpha=0.009000000000000001),
+        #StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
         VarianceThreshold(threshold=0.1), 
-        Lasso(alpha=num_alpha, fit_intercept=num_fit_intercept, precompute=num_precompute, 
+        Lasso(alpha=num_alpha, fit_intercept=num_fit_intercept, precompute=num_precompute,
                    copy_X=num_copy_X, max_iter=num_max_iter, positive=num_positive , selection=num_selection))
         
         #set_param_recursive(pipeline.steps, 'random_state', 42)
@@ -525,21 +532,23 @@ def get_score(model):
 
     if model == models[4]:
                       
-        num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 1000, 543)
         num_C=st.slider("Choisissez la force de régularisation, C :", 0.1, 1000.0, 2.8)
-        num_epsilon=st.slider("Choisissez la marge de tolérance de l'erreur, epsilon :", 0.1, 1000000.0, 1.9)
-        num_loss=st.radio("Choisissez la fonction de perte utilisée pour optimiser le modèle, loss :", ['squared_epsilon_insensitive', 'epsilon_insensitive', 'huber'])
         num_dual=st.radio("Résout le problème dual de la formulation SVM, dual :", [False, True])  
-        num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [False, True])  
+        num_epsilon=st.slider("Choisissez la marge de tolérance de l'erreur, epsilon :", 0.1, 10.0, 1.9)
+        num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [False, True]) 
+        num_intercept_scaling=st.slider("Choisissez l'intercept_scaling' :", 0.1, 10.0, 0.1) 
+        num_loss=st.radio("Choisissez la fonction de perte utilisée pour optimiser le modèle, loss :", ['squared_epsilon_insensitive', 'epsilon_insensitive', 'huber'])
+        num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 1000, 543)
 
         pipeline = make_pipeline(
         StandardScaler(),
-        MinMaxScaler(),
-        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        #MinMaxScaler(),
+        SelectFwe(#score_func=f_regression, 
+                  alpha=0.009000000000000001),
+        #StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
         VarianceThreshold(threshold=0.1), 
         LinearSVR(C=num_C, epsilon=num_epsilon, loss=num_loss, max_iter=num_max_iter,
-                       dual=num_dual, fit_intercept=num_fit_intercept))
+                       dual=num_dual, fit_intercept=num_fit_intercept, intercept_scaling=num_intercept_scaling))
         
         #set_param_recursive(pipeline.steps, 'random_state', 42)
         pipeline.fit(X_train, y_train)
@@ -578,23 +587,28 @@ def get_score(model):
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae 
 
     if model == models[5]:
+
+        num_copy_X=st.radio("Choisissez copy_X :", [True, False])      
+        num_cv=st.slider("Nombre de folds pour la validation croisée, CV :", 1, 20, 15)
         num_fit_intercept=st.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [False, True])  
         num_max_iter=st.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 1000, 181)
-        num_normalize=st.radio("Normalise les variables explicatives, normalize :", [False, True])  
-        num_precompute=st.radio("Utilise une version de précalcul pour la matrice X, precompute :", [True, False])  
-        num_cv=st.slider("Nombre de folds pour la validation croisée, CV :", 1, 20, 15)
         num_n_alpha=st.slider("Nombre maximal de valeurs de l'hyperparamètre alpha à tester, n_alphas :", 1, 1000, 151)
         num_n_jobs=st.slider("Choisissez le nombre de n_jobs : ", -1, 30, 23)        
-        num_copy_X=st.radio("Choisissez copy_X :", [True, False])      
+        num_normalize=st.radio("Normalise les variables explicatives, normalize :", [False, True])  
+        num_positive=st.radio("Choisissez le positive :", [False, True])
+        num_precompute=st.radio("Utilise une version de précalcul pour la matrice X, precompute :", [True, False])  
+        num_verbose=st.radio("Choisissez la verbose :", [False, True])
 
         pipeline = make_pipeline(
         StandardScaler(),
-        MinMaxScaler(),
-        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        #MinMaxScaler(),
+        SelectFwe(#score_func=f_regression, 
+                  alpha=0.009000000000000001),
+        #StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
         VarianceThreshold(threshold=0.1), 
         LassoLarsCV(fit_intercept=num_fit_intercept,max_iter=num_max_iter, normalize=num_normalize, precompute=num_precompute,
-                           cv=num_cv, max_n_alphas=num_n_alpha,n_jobs=num_n_jobs, copy_X=num_copy_X))
+                           cv=num_cv, max_n_alphas=num_n_alpha,n_jobs=num_n_jobs, copy_X=num_copy_X, positive=num_positive,
+                           verbose=num_verbose))
         
         #set_param_recursive(pipeline.steps, 'random_state', 42)
         pipeline.fit(X_train, y_train)
@@ -623,20 +637,20 @@ def get_score(model):
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
     
     if model == models[6]:
-        #num_intercept=st.radio("Choisissez un fit_intercept :", [True, False])
-        #num_copy_X=st.radio("Choisissez copy_X :", [True, False])
-        #num_n_jobs=st.slider("Choisissez le nombre de n_jobs : ", -1, 10, -1)
-        #num_positive=st.radio("Choisissez le positive :", [False, True])
+        num_C=st.slider("Choisissez la force de régularisation, C :", 0.1, 100.0, 0.1)
+        num_epsilon=st.slider("Choisissez la marge de tolérance de l'erreur, epsilon :", 0.1, 10.0, 0.5)
+        num_kernel=st.radio("Choisissez le kernel :", ['linear', 'poly', 'rbf', 'sigmoid'])    
         
-        best_params = load('best_params_svr.joblib')
+        best_params = load('best_params_svr .joblib')
         
         pipeline = make_pipeline(
         StandardScaler(),
-        MinMaxScaler(),
-        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        #MinMaxScaler(),
+        SelectFwe(#score_func=f_regression, 
+                  alpha=0.009000000000000001),
+        #StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
         VarianceThreshold(threshold=0.1), 
-        SVR())
+        SVR(C=num_C, epsilon=num_epsilon, kernel=num_kernel))
         
         #set_param_recursive(pipeline.steps, 'random_state', 42)
         pipeline.fit(X_train, y_train)
@@ -676,9 +690,10 @@ def get_score(model):
         
         pipeline = make_pipeline(
         StandardScaler(),
-        MinMaxScaler(),
-        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        #MinMaxScaler(),
+        SelectFwe(#score_func=f_regression, 
+                  alpha=0.009000000000000001),
+        #StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
         VarianceThreshold(threshold=0.1), 
         DecisionTreeRegressor())
         
@@ -720,9 +735,10 @@ def get_score(model):
         
         pipeline = make_pipeline(
         StandardScaler(),
-        MinMaxScaler(),
-        SelectFwe(score_func=f_regression, alpha=0.009000000000000001),
-        StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+        #MinMaxScaler(),
+        SelectFwe(#score_func=f_regression, 
+                  alpha=0.009000000000000001),
+        #StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
         VarianceThreshold(threshold=0.1), 
         AdaBoostRegressor())
         
@@ -755,10 +771,10 @@ def get_score(model):
         return "Score :",score_p, "R2 :",r2, "MSE :",mse, "MAE :",mae  
 
 if page == pages[3]:
-    st.header("Choix des paramètres pour le modèle")
-    st.image('param.jpg')
-    model = st.selectbox("Recherche des meilleurs paramètres", models)
+    st.sidebar.header("Choix des paramètres pour le modèle")
+    model = st.sidebar.selectbox("Recherche des meilleurs paramètres", models)
     st.write("Meilleurs hyperparamètres :", get_param(model))
+    st.image('param.jpg')
 
 
 if page == pages[4]:
@@ -801,3 +817,22 @@ if page == pages[4]:
         st.write('Meilleurs hyperparamètres pour le modèle:', best_params)
         st.header('Réglage des paramètres')
         st.write("Scores obtenu :", get_score(model))
+        
+    if model == models[6]:
+        best_params = load('best_params_svr .joblib')
+        st.write('Meilleurs hyperparamètres pour le modèle:', best_params)
+        st.header('Réglage des paramètres')
+        st.write("Scores obtenu :", get_score(model))
+        
+    if model == models[7]:
+        best_params = load('best_params_dt.joblib')
+        st.write('Meilleurs hyperparamètres pour le modèle:', best_params)
+        st.header('Réglage des paramètres')
+        st.write("Scores obtenu :", get_score(model))
+        
+    if model == models[8]:
+        best_params = load('best_params_ab.joblib')
+        st.write('Meilleurs hyperparamètres pour le modèle:', best_params)
+        st.header('Réglage des paramètres')
+        st.write("Scores obtenu :", get_score(model))
+        
