@@ -29,10 +29,15 @@ import re
 import joblib
 from joblib import dump, load
 
-df= pd.read_csv("gaming_total_v2.csv")
-df= df.drop('Unnamed: 0', axis=1)
-df_clean=pd.read_csv("df_clean_v2.csv", index_col=0)
-df_gd=pd.get_dummies(df_clean)
+@st.cache_data
+def load_data():
+    df= pd.read_csv("gaming_total_v2.csv")
+    df= df.drop('Unnamed: 0', axis=1)
+    df_clean=pd.read_csv("df_clean_v2.csv", index_col=0)
+    df_gd=pd.get_dummies(df_clean)
+    return df, df_clean, df_gd
+
+df, df_clean, df_gd = load_data()
 
 pages=['Présentation du projet', 'Dataframe', 'Data Visualisation', 'Hyperparamètres', 'Modélisation']
 models= ["Regression Linéaire", "KNN", "Random forest", 'Lasso', 'LinearSVR', 'LassoLarsCV', 'SVR', 'DecisionTreeRegressor', 'AdaBoostRegressor']
