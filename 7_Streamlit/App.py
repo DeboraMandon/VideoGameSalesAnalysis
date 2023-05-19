@@ -28,6 +28,7 @@ import numpy as np
 import re
 import joblib
 from joblib import dump, load
+import scikitplot as skplt
 
 @st.cache_data
 def load_data():
@@ -56,11 +57,11 @@ data_n = {
     "texte_JVC": ["français"]}
 df_new_data = pd.DataFrame(data_n)
 
-pages=['Présentation du projet', 'Dataframe', 'Data Visualisation', 
-       'Hyperparamètres', 'Modélisation', 'Test du modèle']
+pages=['📖 Présentation du projet', '🗃️ Dataframe', '📈 Data Visualisation', 
+       '🛠️ Hyperparamètres', '🚀 Modélisation', '🪄 Test du modèle']
 models= ["Regression Linéaire", "KNN", "Random forest", 'Lasso', 
          'LinearSVR', 'LassoLarsCV', 'SVR', 'DecisionTreeRegressor', 'AdaBoostRegressor']
-graphes=["Graphique de régression"]
+graphes=["Graphique de régression", "Cumulative Gains Curve"]
 graphs=["Evolution des ventes par Région", "Répartition des Ventes par Région", 
             "Répartition des catégories par variables catégorielles", #"Distribution des variables numériques",
             "Distribution des variables", "Heatmap des variables numériques du Dataframe après PreProcessing"]
@@ -238,6 +239,9 @@ def plot_perf(graphe_perf):
         plt.ylabel('Prédictions')
         plt.title('Graphique de régression')
         st.pyplot(fig1)
+    
+    #if graphe_perf == graphes[1]:
+
 
 if page == pages[0]:
     st.title("Video Games Sales Analysis")
@@ -378,9 +382,9 @@ if page == pages[4]:
     
     if model == models[0]:
         num_intercept=st.sidebar.radio("Réglage fit_intercept :", [True, False])
-        num_copy_X=st.sidebar.radio("Choisissez copy_X :", [True, False])
-        num_n_jobs=st.sidebar.number_input("Choisissez n_jobs : ", -1, 10, 1)
-        num_positive=st.sidebar.radio("Choisissez positive :", [True, False], index=1)
+        #num_copy_X=st.sidebar.radio("Choisissez copy_X :", [True, False])
+        #num_n_jobs=st.sidebar.number_input("Choisissez n_jobs : ", -1, 10, 1)
+        #num_positive=st.sidebar.radio("Choisissez positive :", [True, False], index=1)
         graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
         st.subheader('Réglage des paramètres')
         #st.image("ml.jpg")
@@ -395,7 +399,7 @@ if page == pages[4]:
                           alpha=0.009000000000000001),
                 StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
                 VarianceThreshold(threshold=0.1), 
-                LinearRegression(fit_intercept=num_intercept, copy_X=num_copy_X, n_jobs=num_n_jobs, positive=num_positive))
+                LinearRegression(fit_intercept=num_intercept))
             #set_param_recursive(pipeline.steps, 'random_state', 42)
             pipeline.fit(X_train, y_train)
             get_score(model)
@@ -447,12 +451,12 @@ if page == pages[4]:
             plot_perf(graphe_perf)
 
     if model == models[2]:
-        num_n_estimators=st.sidebar.slider("Choisissez le nombre d'arbres dans la forêt, n_estimators : ", 1, 100, 18)
-        num_criterion=st.sidebar.radio("Choisissez la mesure de qualité de la division de l'arbre, criterion :", ['friedman_mse', 'squared_error', 'absolute_error', 'poisson'])
-        num_min_samples_split=st.sidebar.slider("Choisissez le nombre minimum d'échantillons requis pour diviser un nœud interne, min_samples_split : ", 2, 100, 100)  
-        num_min_samples_leaf=st.sidebar.slider("Choisissez le nombre minimum d'échantillons requis pour être à une feuille, min_samples_leaf : ", 1, 100, 100)  
-        num_min_weight_fraction_leaf=st.sidebar.slider("Choisissez la fraction minimale du poids total des échantillons (pondérés) requise pour être à une feuille, min_weight_fraction_leaf : ", 0.0, 0.5, 0.5)  
-        num_max_features=st.sidebar.radio("Choisissez le nombre de caractéristiques à considérer lors de la recherche de la meilleure division, max_features :", ['sqrt', 'log2', 'auto', None])
+        num_n_estimators=st.sidebar.number_input("Choisissez le nombre d'arbres dans la forêt, n_estimators : ", 1, 100, 100)
+        #num_criterion=st.sidebar.radio("Choisissez la mesure de qualité de la division de l'arbre, criterion :", ['friedman_mse', 'squared_error', 'absolute_error', 'poisson'])
+        num_min_samples_split=st.sidebar.number_input("Choisissez le nombre minimum d'échantillons requis pour diviser un nœud interne, min_samples_split : ", 2, 100, 2)  
+        num_min_samples_leaf=st.sidebar.number_input("Choisissez le nombre minimum d'échantillons requis pour être à une feuille, min_samples_leaf : ", 1, 100, 1)  
+        num_min_weight_fraction_leaf=st.sidebar.number_input("Choisissez la fraction minimale du poids total des échantillons (pondérés) requise pour être à une feuille, min_weight_fraction_leaf : ", 0.0, 0.5, 0.0)  
+        num_max_features=st.sidebar.radio("Choisissez le nombre de caractéristiques à considérer lors de la recherche de la meilleure division, max_features :", ['sqrt', 'log2', 'auto', None], index=2)
         graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
         st.subheader('Réglage des paramètres')
         #st.image("ml.gif")
@@ -466,13 +470,13 @@ if page == pages[4]:
                           alpha=0.009000000000000001),
                 StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
                 VarianceThreshold(threshold=0.1), 
-                RandomForestRegressor(n_estimators=num_n_estimators, criterion=num_criterion, min_samples_split=num_min_samples_split,
+                RandomForestRegressor(n_estimators=num_n_estimators, min_samples_split=num_min_samples_split,
                                    min_samples_leaf=num_min_samples_leaf, min_weight_fraction_leaf=num_min_weight_fraction_leaf, 
                                    max_features=num_max_features))
             #set_param_recursive(pipeline.steps, 'random_state', 42)
             pipeline.fit(X_train, y_train)
             get_score(model)
-            score_p, y_pred, r2, mse, mae = get_score(model)
+            score_p, y_pred, r2, mse, mae= get_score(model)
             st.markdown("Score : ")
             st.write(score_p)
             st.markdown("R2 : ")
@@ -482,10 +486,10 @@ if page == pages[4]:
             st.markdown("MAE : ")
             st.write(mae)
             plot_perf(graphe_perf)
-                
+              
     if model == models[3]:
         num_alpha=st.sidebar.number_input("Choisissez le paramètre de régularisation, alpha :", 0.0, 10.0, 0.1)
-        num_copy_X=st.sidebar.radio("Choisissez copy_X :", [True, False], index=1)      
+        #num_copy_X=st.sidebar.radio("Choisissez copy_X :", [True, False], index=1)      
         num_fit_intercept=st.sidebar.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [True, False])
         num_max_iter=st.sidebar.number_input("Choisissez le nombre maximum d'itérations effectuées :", 0, 5000, 2000)
         num_positive=st.sidebar.radio("Restreint les coefficients à être positifs, positive :", [True, False], index=1)         
@@ -505,7 +509,7 @@ if page == pages[4]:
                 StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
                 VarianceThreshold(threshold=0.1), 
                 Lasso(alpha=num_alpha, fit_intercept=num_fit_intercept, precompute=num_precompute,
-                      copy_X=num_copy_X, max_iter=num_max_iter, positive=num_positive , selection=num_selection))
+                      max_iter=num_max_iter, positive=num_positive , selection=num_selection))
             #set_param_recursive(pipeline.steps, 'random_state', 42)
             pipeline.fit(X_train, y_train)
             get_score(model)
@@ -558,7 +562,7 @@ if page == pages[4]:
             plot_perf(graphe_perf)
      
     if model == models[5]:
-        num_copy_X=st.sidebar.radio("Choisissez copy_X :", [True, False])      
+        #num_copy_X=st.sidebar.radio("Choisissez copy_X :", [True, False])      
         num_cv=st.sidebar.number_input("Nombre de folds pour la validation croisée, CV :", 1, 20, 5)
         num_fit_intercept=st.sidebar.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [True, False])  
         num_max_iter=st.sidebar.number_input("Choisissez le nombre maximum d'itérations effectuées :", 0, 1000, 500)
@@ -583,7 +587,7 @@ if page == pages[4]:
                 VarianceThreshold(threshold=0.1), 
                 LassoLarsCV(fit_intercept=num_fit_intercept,max_iter=num_max_iter, #normalize=num_normalize, precompute=num_precompute,
                                 cv=num_cv, max_n_alphas=num_n_alpha,#n_jobs=num_n_jobs, 
-                                copy_X=num_copy_X, positive=num_positive,verbose=num_verbose))  
+                                positive=num_positive,verbose=num_verbose))  
             #set_param_recursive(pipeline.steps, 'random_state', 42)
             pipeline.fit(X_train, y_train)
             get_score(model)
