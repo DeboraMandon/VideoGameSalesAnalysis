@@ -36,11 +36,30 @@ def load_data():
     df_clean=pd.read_csv("df_clean_v2.csv", index_col=0)
     df_gd=pd.get_dummies(df_clean)
     return df, df_clean, df_gd
-
 df, df_clean, df_gd = load_data()
 
-pages=['Présentation du projet', 'Dataframe', 'Data Visualisation', 'Hyperparamètres', 'Modélisation']
-models= ["Regression Linéaire", "KNN", "Random forest", 'Lasso', 'LinearSVR', 'LassoLarsCV', 'SVR', 'DecisionTreeRegressor', 'AdaBoostRegressor']
+data_n = {
+    "Platform": ["Xbox Series"],
+    "Year": [2023],
+    "Genre": ["Action"],
+    "Publisher": ["Warner Bros Games"],
+    "Meta_NP": [14],
+    "Meta_VP": [43],
+    "Meta_NUsers": [130],
+    "Meta_VUsers": [2.3],
+    "test_note_JVC": [18],
+    "avis_count_JVC": [61],
+    "avis_note_JVC": [15.3],
+    "Classification_Age_JVC": [8],
+    "Support_JVC": ["DVD"],
+    "langue_parlée_JVC": ["français"],
+    "texte_JVC": ["français"]}
+df_new_data = pd.DataFrame(data_n)
+
+pages=['Présentation du projet', 'Dataframe', 'Data Visualisation', 
+       'Hyperparamètres', 'Modélisation', 'Test du modèle']
+models= ["Regression Linéaire", "KNN", "Random forest", 'Lasso', 
+         'LinearSVR', 'LassoLarsCV', 'SVR', 'DecisionTreeRegressor', 'AdaBoostRegressor']
 graphes=["Graphique de régression"]
 graphs=["Evolution des ventes par Région", "Répartition des Ventes par Région", 
             "Répartition des catégories par variables catégorielles", #"Distribution des variables numériques",
@@ -224,7 +243,7 @@ if page == pages[0]:
     st.title("Video Games Sales Analysis")
     st.header("Machine Learning Project")
     st.subheader("Auteur : Débora Mandon")
-    st.image('image-jeux-video.jpg')
+    #st.image('image-jeux-video.jpg')
     st.markdown("Pour ce projet il faudra estimer les ventes totales d’un jeu vidéo à l’aide d’informations descriptives comme: \n"
                 "- Le pays d’origine \n"
                 "- Le studio l’ayant développé ● \n"
@@ -240,12 +259,13 @@ if page == pages[0]:
     st.markdown("Les autres descripteurs ont été récupérés via du web scraping à l’aide de la libraire Selenium.")
 
 if page == pages[1]:
+    st.sidebar.subheader("Dataframe")
     if st.sidebar.checkbox("Afficher les données brutes :", False):
         st.subheader("Jeu de données 'vg_sales' : Echantillon de 100 observations")
         st.write(df.sample(100))
     
     st.header("Analyse du Dataframe")
-    st.image("analytics.jpg")
+    #st.image("analytics.jpg")
     st.markdown("")
     st.markdown("Notre dataset de base est composée de 16598 lignes et 10 colonnes. \n"
                 "Il comprend les variables suivantes : \n"
@@ -291,15 +311,16 @@ if page == pages[2]:
             df[f'cat_{i}'] = pd.qcut(df[i], q=[0,.25,.5,.75,1.], duplicates='drop')
         df['Year']=pd.to_datetime(df['Year'], format='%Y')
         sales_per_year=df.groupby('Year', as_index=False).agg({'NA_Sales':sum, 'EU_Sales':sum, 'JP_Sales':sum, 'Other_Sales':sum,'Global_Sales':sum})
-        choices_num =st.sidebar.multiselect("Choisissez les variables numériques à étudier", sales_per_year.select_dtypes(include=['int64', 'float64']).columns)
+        num_col_df=list(sales_per_year.select_dtypes(include=['int64', 'float64']).columns)
+        choices_num =st.sidebar.multiselect("Choisissez les variables numériques à étudier", num_col_df, default=num_col_df)
 
         fig1=plt.figure(figsize=(10,5))
         sns.set(style="whitegrid")
         plt.plot_date(x=sales_per_year['Year'].values,
-                    y=sales_per_year[choices_num].values,
-                    xdate=True,
-                    ls='-',
-                    label=choices_num)
+                y=sales_per_year[choices_num].values,
+                xdate=True,
+                ls='-',
+                label=choices_num)
         plt.legend(loc='best')
         plt.xlabel('Année')
         plt.ylabel('Ventes en millions')
@@ -333,7 +354,7 @@ if page == pages[2]:
         fig5=plt.figure()
         sns.histplot(df_clean[choices_var], label=choices_var)
         #sns.histplot(df_le['Global_Sales'])
-        plt.xticks(rotation=45)
+        plt.xticks(rotation=70, ha='right', fontsize=8)
         plt.legend()
         st.pyplot(fig5)
             
@@ -347,7 +368,7 @@ if page == pages[3]:
     st.header("Choix des paramètres pour le modèle")
     model = st.sidebar.selectbox("Recherche des meilleurs paramètres", models)
     st.write("Meilleurs hyperparamètres :", get_param(model))
-    st.image('engrenage.gif')
+    #st.image('engrenage.gif')
 
 if page == pages[4]:
     st.header("Entrainement des modèles")
@@ -359,13 +380,13 @@ if page == pages[4]:
         num_intercept=st.sidebar.radio("Réglage fit_intercept :", [True, False])
         num_copy_X=st.sidebar.radio("Choisissez copy_X :", [True, False])
         num_n_jobs=st.sidebar.number_input("Choisissez n_jobs : ", -1, 10, 1)
-        num_positive=st.sidebar.radio("Choisissez positive :", [True, False])
+        num_positive=st.sidebar.radio("Choisissez positive :", [True, False], index=1)
         graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
         st.subheader('Réglage des paramètres')
-        st.image("ml.gif")
+        #st.image("ml.jpg")
         best_params = load('best_params_lr2.joblib')
-        st.write('Rappel des meilleurs hyperparamètres pour le modèle:', best_params)
-        if st.sidebar.button('Execution', key="classify"):
+        st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
+        if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
 
             pipeline = make_pipeline(
                 StandardScaler(),
@@ -391,17 +412,17 @@ if page == pages[4]:
 
     if model == models[1]:
         num_algos=st.sidebar.radio("Choisissez algorithm :", ['kd_tree', 'brute', 'auto', 'ball_tree'])
-        num_leaf_size=st.sidebar.number_input("Choisissez leaf_size : ", 1, 100, 10)        
-        num_metrics=st.sidebar.radio("Choisissez metric :", ['euclidean', 'manhattan', 'chebyshev', 'minkowski'])
-        num_n_neighbors=st.sidebar.number_input("Choisissez  n_neighbors : ", 1, 20, 1)
+        num_leaf_size=st.sidebar.number_input("Choisissez leaf_size : ", 1, 100, 30)        
+        num_metrics=st.sidebar.radio("Choisissez metric :", ['euclidean', 'manhattan', 'chebyshev', 'minkowski'], index=3)
+        num_n_neighbors=st.sidebar.number_input("Choisissez  n_neighbors : ", 1, 20, 7)
         num_p=st.sidebar.number_input("Choisissez p : ", 1, 10, 1)  
-        num_weights=st.sidebar.radio("Choisissez une fonction de pondération, weights :", ['uniform', 'distance'])
+        num_weights=st.sidebar.radio("Choisissez une fonction de pondération, weights :", ['uniform', 'distance'], index=1)
         graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
         st.subheader('Réglage des paramètres')
-        st.image("ml.gif")
+        #st.image("ml.gif")
         best_params = load('best_params_knn2.joblib')
-        st.write('Rappel des meilleurs hyperparamètres pour le modèle:', best_params)
-        if st.sidebar.button('Execution', key="classify"):
+        st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
+        if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
             pipeline = make_pipeline(
                 StandardScaler(),
                 #MinMaxScaler(),
@@ -434,10 +455,10 @@ if page == pages[4]:
         num_max_features=st.sidebar.radio("Choisissez le nombre de caractéristiques à considérer lors de la recherche de la meilleure division, max_features :", ['sqrt', 'log2', 'auto', None])
         graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
         st.subheader('Réglage des paramètres')
-        st.image("ml.gif")
+        #st.image("ml.gif")
         best_params = load('best_params_rf2.joblib')
-        st.write('Rappel des meilleurs hyperparamètres pour le modèle:', best_params)
-        if st.sidebar.button('Execution', key="classify"):
+        st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
+        if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
             pipeline = make_pipeline(
                 StandardScaler(),
                 #MinMaxScaler(),
@@ -463,19 +484,19 @@ if page == pages[4]:
             plot_perf(graphe_perf)
                 
     if model == models[3]:
-        num_alpha=st.sidebar.number_input("Choisissez le paramètre de régularisation, alpha :", 0.0, 10.0, 5.0)
-        num_copy_X=st.sidebar.radio("Choisissez copy_X :", [True, False])      
+        num_alpha=st.sidebar.number_input("Choisissez le paramètre de régularisation, alpha :", 0.0, 10.0, 0.1)
+        num_copy_X=st.sidebar.radio("Choisissez copy_X :", [True, False], index=1)      
         num_fit_intercept=st.sidebar.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [True, False])
         num_max_iter=st.sidebar.number_input("Choisissez le nombre maximum d'itérations effectuées :", 0, 5000, 2000)
-        num_positive=st.sidebar.radio("Restreint les coefficients à être positifs, positive :", [True, False])         
+        num_positive=st.sidebar.radio("Restreint les coefficients à être positifs, positive :", [True, False], index=1)         
         num_precompute=st.sidebar.radio("Utilise une version de précalcul pour la matrice X, precompute :", [True, False])  
         num_selection=st.sidebar.radio("Choisissez la méthode utilisée pour sélectionner les variables dans le modèle :", ['random', 'cyclic'])
         graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
         st.subheader('Réglage des paramètres')
-        st.image("ml.gif")
+        #st.image("ml.gif")
         best_params = load('best_params_lass2.joblib')
-        st.write('Rappel des meilleurs hyperparamètres pour le modèle:', best_params)
-        if st.sidebar.button('Execution', key="classify"):
+        st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
+        if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
             pipeline = make_pipeline(
                 StandardScaler(),
                 #MinMaxScaler(),
@@ -501,18 +522,18 @@ if page == pages[4]:
          
     if model == models[4]:
         num_C=st.sidebar.number_input("Choisissez la force de régularisation, C :", 0.1, 10.0, 0.1)
-        num_dual=st.sidebar.radio("Résout le problème dual de la formulation SVM, dual :", [True, False])  
+        num_dual=st.sidebar.radio("Résout le problème dual de la formulation SVM, dual :", [True, False], index=1)  
         num_epsilon=st.sidebar.number_input("Choisissez la marge de tolérance de l'erreur, epsilon :", 0.1, 10.0, 0.1)
-        num_fit_intercept=st.sidebar.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [True, False]) 
+        num_fit_intercept=st.sidebar.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [True, False], index=1) 
         num_intercept_scaling=st.sidebar.number_input("Choisissez l'intercept_scaling' :", 0.1, 10.0, 0.1) 
         num_loss=st.sidebar.radio("Choisissez la fonction de perte utilisée pour optimiser le modèle, loss :", ['squared_epsilon_insensitive', 'epsilon_insensitive', 'huber'])
-        num_max_iter=st.sidebar.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 1000, 543)
+        num_max_iter=st.sidebar.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 1000, 1000)
         graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
         st.subheader('Réglage des paramètres')
-        st.image("ml.gif")
+        #st.image("ml.gif")
         best_params = load('best_params_line2.joblib')
-        st.write('Rappel des meilleurs hyperparamètres pour le modèle:', best_params)
-        if st.sidebar.button('Execution', key="classify"):
+        st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
+        if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
             pipeline = make_pipeline(
                 StandardScaler(),
                 #MinMaxScaler(),
@@ -539,20 +560,20 @@ if page == pages[4]:
     if model == models[5]:
         num_copy_X=st.sidebar.radio("Choisissez copy_X :", [True, False])      
         num_cv=st.sidebar.number_input("Nombre de folds pour la validation croisée, CV :", 1, 20, 5)
-        num_fit_intercept=st.sidebar.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [False, True])  
+        num_fit_intercept=st.sidebar.radio("Calcule l'ordonnée à l'origine, fit_intercept :", [True, False])  
         num_max_iter=st.sidebar.number_input("Choisissez le nombre maximum d'itérations effectuées :", 0, 1000, 500)
         num_n_alpha=st.sidebar.number_input("Nombre maximal de valeurs de l'hyperparamètre alpha à tester, n_alphas :", 1, 1000, 1000)
         #num_n_jobs=st.sidebar.slider("Choisissez le nombre de n_jobs : ", -1, 30, 23)        
         #num_normalize=st.sidebar.radio("Normalise les variables explicatives, normalize :", [False, True])  
-        num_positive=st.sidebar.radio("Choisissez le positive :", [True, False])
+        num_positive=st.sidebar.radio("Choisissez le positive :", [True, False], index=1)
         #num_precompute=st.sidebar.radio("Utilise une version de précalcul pour la matrice X, precompute :", [True, False])  
-        num_verbose=st.sidebar.radio("Choisissez la verbose :", [True, False])
+        num_verbose=st.sidebar.radio("Choisissez la verbose :", [True, False], index=1)
         graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
         st.subheader('Réglage des paramètres')
-        st.image("ml.gif")
+        #st.image("ml.gif")
         best_params = load('best_params_lasso_cv2.joblib')
-        st.write('Rappel des meilleurs hyperparamètres pour le modèle:', best_params)
-        if st.sidebar.button('Execution', key="classify"):
+        st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
+        if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
             pipeline = make_pipeline(
                 StandardScaler(),
                 #MinMaxScaler(),
@@ -583,10 +604,10 @@ if page == pages[4]:
         num_kernel=st.sidebar.radio("Choisissez le kernel :", ['linear', 'poly', 'rbf', 'sigmoid']) 
         graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
         st.subheader('Réglage des paramètres')
-        st.image("ml.gif")
+        #st.image("ml.gif")
         best_params = load('best_params_svr2.joblib')
-        st.write('Rappel des meilleurs hyperparamètres pour le modèle:', best_params)
-        if st.sidebar.button('Execution', key="classify"):
+        st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
+        if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
 
             pipeline = make_pipeline(
                 StandardScaler(),
@@ -611,16 +632,15 @@ if page == pages[4]:
             plot_perf(graphe_perf)
       
     if model == models[7]:
-        #num_intercept=st.radio("Choisissez un fit_intercept :", [True, False])
-        #num_copy_X=st.radio("Choisissez copy_X :", [True, False])
-        #num_n_jobs=st.slider("Choisissez le nombre de n_jobs : ", -1, 10, -1)
-        #num_positive=st.radio("Choisissez le positive :", [False, True])
+        num_max_depth=st.sidebar.number_input("Choisissez max_depth :", 0, 10, 5)
+        num_sample_leaf=st.sidebar.number_input("Choisissez min_sample_leaf :", 0, 10, 1)
+        num_sample_split=st.sidebar.number_input("Choisissez min_sample_split :", 0, 10, 2)
         graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
         st.subheader('Réglage des paramètres')
-        st.image("ml.gif")
+        #st.image("ml.gif")
         best_params = load('best_params_dt2.joblib')
-        st.write('Rappel des meilleurs hyperparamètres pour le modèle:', best_params)
-        if st.sidebar.button('Execution', key="classify"):
+        st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
+        if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
             pipeline = make_pipeline(
                 StandardScaler(),
                 #MinMaxScaler(),
@@ -628,7 +648,8 @@ if page == pages[4]:
                           alpha=0.009000000000000001),
                 StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
                 VarianceThreshold(threshold=0.1), 
-                DecisionTreeRegressor())
+                DecisionTreeRegressor(max_depth=num_max_depth, min_samples_leaf=num_sample_leaf,
+                                      min_samples_split=num_sample_split))
             #set_param_recursive(pipeline.steps, 'random_state', 42)
             pipeline.fit(X_train, y_train)
             get_score(model)
@@ -644,16 +665,14 @@ if page == pages[4]:
             plot_perf(graphe_perf)
         
     if model == models[8]:
-        #num_intercept=st.radio("Choisissez un fit_intercept :", [True, False])
-        #num_copy_X=st.radio("Choisissez copy_X :", [True, False])
-        #num_n_jobs=st.slider("Choisissez le nombre de n_jobs : ", -1, 10, -1)
-        #num_positive=st.radio("Choisissez le positive :", [False, True])
+        num_learning_rate=st.sidebar.number_input("Choisissez learning_rate :", 0.0, 10.0, 0.1)
+        num_n_estimators=st.sidebar.number_input("Choisissez n_estimators :", 0, 100, 50)
         graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
         st.subheader('Réglage des paramètres')
-        st.image("ml.gif")
+        #st.image("ml.gif")
         best_params = load('best_params_ab2.joblib')
-        st.write('Rappel des meilleurs hyperparamètres pour le modèle:', best_params)
-        if st.sidebar.button('Execution', key="classify"):
+        st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
+        if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
             pipeline = make_pipeline(
                 StandardScaler(),
                 #MinMaxScaler(),
@@ -661,7 +680,7 @@ if page == pages[4]:
                           alpha=0.009000000000000001),
                 StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
                 VarianceThreshold(threshold=0.1), 
-                AdaBoostRegressor())
+                AdaBoostRegressor(learning_rate=num_learning_rate, n_estimators=num_n_estimators))
             #set_param_recursive(pipeline.steps, 'random_state', 42)
             pipeline.fit(X_train, y_train)
             get_score(model)
@@ -675,4 +694,17 @@ if page == pages[4]:
             st.markdown("MAE : ")
             st.write(mae)
             plot_perf(graphe_perf)
+   
+if page == pages[5]:
+    st.header("Test du modèle")
+
+    edited_df=st.experimental_data_editor(df_new_data, num_rows='dynamic') 
+    st.markdown("Appliquez mon modèle de ML à ces nouvelles données:")
+    
+    new_data_encoded = pd.get_dummies(edited_df)
+    values_test=list(edited_df.iloc[0])
+    st.write(values_test)
+        
+    #if st.button('Execution', key="classify"):
+
         
