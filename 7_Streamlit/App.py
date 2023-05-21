@@ -244,10 +244,10 @@ def plot_perf(graphe_perf):
 
 
 if page == pages[0]:
+    st.image('DS.jpg')
     st.title("Video Games Sales Analysis")
     st.header("Machine Learning Project")
     st.subheader("Auteur : Débora Mandon")
-    #st.image('image-jeux-video.jpg')
     st.markdown("Pour ce projet il faudra estimer les ventes totales d’un jeu vidéo à l’aide d’informations descriptives comme: \n"
                 "- Le pays d’origine \n"
                 "- Le studio l’ayant développé ● \n"
