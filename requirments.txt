@@ -1,11 +1,9 @@
-Liste des librairies nécessaires:
-
-Pandas
-
-Numpy
-Seaborn
-Matplotlib
-
-Selenium
-
-ScikitLearn
+pandas
+numpy
+seaborn
+matplotlib
+sklearn
+tpot
+re
+joblib
+scikitplot
