@@ -250,9 +250,9 @@ if page == pages[0]:
     st.subheader("Auteur : Débora Mandon")
     st.markdown("Pour ce projet il faudra estimer les ventes totales d’un jeu vidéo à l’aide d’informations descriptives comme: \n"
                 "- Le pays d’origine \n"
-                "- Le studio l’ayant développé ● \n"
+                "- Le studio l’ayant développé  \n"
                 "- L’éditeur l’ayant publié \n"
-                "- La description du jeu ● \n"
+                "- La description du jeu  \n"
                 "- La plateforme sur laquelle le jeu est sortie \n"
                 "-  Le genre")
     st.markdown("")
@@ -701,14 +701,16 @@ if page == pages[4]:
    
 if page == pages[5]:
     st.header("Test du modèle")
+    st.subheader("Nous allons essayer de prédire les ventes du jeu suivant :")
 
     edited_df=st.experimental_data_editor(df_new_data, num_rows='dynamic') 
     st.markdown("Appliquez mon modèle de ML à ces nouvelles données:")
-    
-    new_data_encoded = pd.get_dummies(edited_df)
-    values_test=list(edited_df.iloc[0])
-    st.write(values_test)
-        
-    #if st.button('Execution', key="classify"):
+    new_X_test=st.experimental_data_editor(X_test, num_rows='dynamic') 
+    rf = load('rf.joblib')
+    y_pred=rf.predict(X_test)
+    st.write("Le jeu Hogwarts Legacy devrait se vendre à",round(y_pred[-1],2), "millions d'exemplaires.")
+    st.write("Sur Google, nous pouvons observer que le jeu s'est vendu à 15 millions d'exemplaires.")
+    st.write("")
+    st.write("Nous pouvons donc nous interroger sur les performances de ce modèlequi ne semble pas des plus efficaces.")
 
         
