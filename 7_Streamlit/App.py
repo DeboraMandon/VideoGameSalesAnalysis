@@ -66,7 +66,7 @@ graphs=["Evolution des ventes par Région", "Répartition des Ventes par Région
             "Répartition des catégories par variables catégorielles", #"Distribution des variables numériques",
             "Distribution des variables", "Heatmap des variables numériques du Dataframe après PreProcessing"]
 
-st.sidebar.image('image-jeux-video.jpg')
+st.sidebar.image('DS.jpg')
 st.sidebar.title("Video Games Sales Analysis")
 page=st.sidebar.radio("Choisissez votre page",pages)
 #st.sidebar.header("Machine Learning Project")
@@ -244,7 +244,7 @@ def plot_perf(graphe_perf):
 
 
 if page == pages[0]:
-    st.image('DS.jpg')
+    st.image('image-jeux-video.jpg', use_column_width=1)
     st.title("Video Games Sales Analysis")
     st.header("Machine Learning Project")
     st.subheader("Auteur : Débora Mandon")
