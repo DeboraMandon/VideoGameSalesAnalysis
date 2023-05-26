@@ -29,6 +29,9 @@ import re
 import joblib
 from joblib import dump, load
 import scikitplot as skplt
+import shap
+from IPython.display import display
+
 
 @st.cache_data
 def load_data():
@@ -58,7 +61,7 @@ data_n = {
 df_new_data = pd.DataFrame(data_n)
 
 pages=['📖 Présentation du projet', '🗃️ Dataframe', '📈 Data Visualisation', 
-       '🛠️ Hyperparamètres', '🚀 Modélisation', '🪄 Test du modèle']
+       '🛠️ Hyperparamètres', '🚀 Modélisation', '💡 Interprétabilité des modèles', '🪄 Test du modèle']
 models= ["Regression Linéaire", "KNN", "Random forest", 'Lasso', 
          'LinearSVR', 'LassoLarsCV', 'SVR', 'DecisionTreeRegressor', 'AdaBoostRegressor']
 graphes=["Graphique de régression", "Cumulative Gains Curve"]
@@ -700,6 +703,199 @@ if page == pages[4]:
             plot_perf(graphe_perf)
    
 if page == pages[5]:
+    st.header("Interprétabilité du modèle")
+    model = st.selectbox("Choisissez votre modèle", models)
+    
+    if model == models[0]:
+        best_params = load('best_params_lr2.joblib')
+        pipeline = make_pipeline(
+            StandardScaler(),
+            SelectFwe(alpha=0.009000000000000001),
+            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+            VarianceThreshold(threshold=0.1))
+        pipeline.fit(X_train, y_train)
+        lr=LinearRegression(**best_params)
+        lr.fit(X_train, y_train)
+        
+        st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
+        coefficients = pd.Series(lr.coef_, index=X_train.columns)
+        top_15_features = coefficients.abs().nlargest(15) 
+        fig=plt.figure(figsize=(10, 6))
+        top_15_features.plot(kind='barh')
+        plt.xlabel('Coefficient')
+        plt.ylabel('Feature')
+        plt.title('Top 15 Feature Importances (Linear Regression)')
+        st.pyplot(fig)
+
+    if model == models[1]:
+        best_params = load('best_params_knn2.joblib')
+        pipeline = make_pipeline(
+            StandardScaler(),
+            SelectFwe(alpha=0.009000000000000001),
+            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+            VarianceThreshold(threshold=0.1))
+        pipeline.fit(X_train, y_train)
+        knn=KNeighborsRegressor(**best_params)
+        knn.fit(X_train, y_train)
+        st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
+        sorted_importances=load("sorted_importances_knn.joblib")
+        sorted_feature_names=load("sorted_feature_names_knn.joblib")
+        top_feature_names = sorted_feature_names[:15]
+        top_importances = sorted_importances[:15]
+        fig=plt.figure(figsize=(10, 6))
+        plt.barh(range(len(top_importances)), top_importances, tick_label=top_feature_names)
+        plt.xlabel('Importance')
+        plt.ylabel('Feature')
+        plt.title('Top 15 Feature Importances (KNN)')
+        st.pyplot(fig)
+        
+    if model == models[2]:
+        best_params = load('best_params_rf2.joblib')
+        pipeline = make_pipeline(
+            StandardScaler(),
+            SelectFwe(alpha=0.009000000000000001),
+            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+            VarianceThreshold(threshold=0.1))
+        pipeline.fit(X_train, y_train)
+        rf=RandomForestRegressor(**best_params)
+        rf.fit(X_train, y_train)
+        explainer = shap.TreeExplainer(rf)
+        shap_values = load('shap_values_rf.joblib')
+        st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
+        st.set_option('deprecation.showPyplotGlobalUse', False)
+        st.pyplot(shap.summary_plot(shap_values, X_test, plot_type="bar"))
+        
+        st.pyplot(shap.summary_plot(shap_values, X_test))
+                   
+    if model == models[3]:
+        best_params = load('best_params_lass2.joblib')
+        pipeline = make_pipeline(
+            StandardScaler(),
+            SelectFwe(alpha=0.009000000000000001),
+            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+            VarianceThreshold(threshold=0.1)
+            )
+        pipeline.fit(X_train, y_train)
+        lass=Lasso(**best_params)
+        lass.fit(X_train, y_train)
+        coefficients = pd.Series(lass.coef_, index=X_train.columns)
+        top_15_features = coefficients.abs().nlargest(15) 
+        fig=plt.figure(figsize=(10, 6))
+        top_15_features.plot(kind='barh')
+        plt.xlabel('Coefficient')
+        plt.ylabel('Feature')
+        plt.title('Top 15 Feature Importances (Lasso)')
+        st.pyplot(fig)    
+             
+    if model == models[4]:
+        best_params = load('best_params_line2.joblib')
+        pipeline = make_pipeline(
+            StandardScaler(),
+            SelectFwe(alpha=0.009000000000000001),
+            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+            VarianceThreshold(threshold=0.1)
+            )
+        pipeline.fit(X_train, y_train)
+        line=LinearSVR(**best_params)
+        line.fit(X_train, y_train)
+        
+        st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
+        coefficients = pd.Series(line.coef_, index=X_train.columns)
+        top_15_features = coefficients.abs().nlargest(15) 
+        fig=plt.figure(figsize=(10, 6))
+        top_15_features.plot(kind='barh')
+        plt.xlabel('Coefficient')
+        plt.ylabel('Feature')
+        plt.title('Top 15 Feature Importances (LinearSVR)')
+        st.pyplot(fig)    
+         
+    if model == models[5]:
+        best_params = load('best_params_lasso_cv2.joblib')
+        pipeline = make_pipeline(
+            StandardScaler(),
+            SelectFwe(alpha=0.009000000000000001),
+            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+            VarianceThreshold(threshold=0.1))  
+        pipeline.fit(X_train, y_train)
+        lassCV=LassoLarsCV(**best_params)
+        lassCV.fit(X_train, y_train)
+        coefficients = pd.Series(lassCV.coef_, index=X_train.columns)
+        top_15_features = coefficients.abs().nlargest(15) 
+        fig=plt.figure(figsize=(10, 6))
+        top_15_features.plot(kind='barh')
+        plt.xlabel('Coefficient')
+        plt.ylabel('Feature')
+        plt.title('Top 15 Feature Importances (LassoLarsCV)')
+        st.pyplot(fig) 
+        
+    if model == models[6]:
+        best_params = load('best_params_svr2.joblib')
+        pipeline = make_pipeline(
+            StandardScaler(),
+            SelectFwe(alpha=0.009000000000000001),
+            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+            VarianceThreshold(threshold=0.1) 
+            )  
+        pipeline.fit(X_train, y_train)
+        svr=SVR(**best_params)
+        svr.fit(X_train, y_train)
+        st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
+        sorted_importances=load("sorted_importances_svr.joblib")
+        sorted_feature_names=load("sorted_feature_names_svr.joblib")
+        top_feature_names = sorted_feature_names[:15]
+        top_importances = sorted_importances[:15]
+        fig=plt.figure(figsize=(10, 6))
+        plt.barh(range(len(top_importances)), top_importances, tick_label=top_feature_names)
+        plt.xlabel('Importance')
+        plt.ylabel('Feature')
+        plt.title('Top 15 Feature Importances (SVR)')
+        st.pyplot(fig)
+           
+    if model == models[7]:
+        best_params = load('best_params_dt2.joblib')
+        pipeline = make_pipeline(
+            StandardScaler(),
+            SelectFwe(alpha=0.009000000000000001),
+            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+            VarianceThreshold(threshold=0.1))
+        pipeline.fit(X_train, y_train)
+        dt=DecisionTreeRegressor(**best_params)
+        dt.fit(X_train, y_train)
+        st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
+        sorted_importances=load("sorted_importances_dt.joblib")
+        sorted_feature_names=load("sorted_feature_names_dt.joblib")
+        top_feature_names = sorted_feature_names[:15]
+        top_importances = sorted_importances[:15]
+        fig=plt.figure(figsize=(10, 6))
+        plt.barh(range(len(top_importances)), top_importances, tick_label=top_feature_names)
+        plt.xlabel('Importance')
+        plt.ylabel('Feature')
+        plt.title('Top 15 Feature Importances (DecisionTreeRegressor)')
+        st.pyplot(fig)
+         
+    if model == models[8]:
+        best_params = load('best_params_ab2.joblib')
+        pipeline = make_pipeline(
+            StandardScaler(),
+            SelectFwe(alpha=0.009000000000000001),
+            StackingEstimator(estimator=RandomForestRegressor(bootstrap=False, max_features=0.25, min_samples_leaf=14, min_samples_split=7, n_estimators=100)),
+            VarianceThreshold(threshold=0.1))
+        pipeline.fit(X_train, y_train)
+        ab=AdaBoostRegressor(**best_params)
+        ab.fit(X_train, y_train)
+        st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
+        sorted_importances=load("sorted_importances_ab.joblib")
+        sorted_feature_names=load("sorted_feature_names_ab.joblib")
+        top_feature_names = sorted_feature_names[:15]
+        top_importances = sorted_importances[:15]
+        fig=plt.figure(figsize=(10, 6))
+        plt.barh(range(len(top_importances)), top_importances, tick_label=top_feature_names)
+        plt.xlabel('Importance')
+        plt.ylabel('Feature')
+        plt.title('Top 15 Feature Importances (AdaBoostRegressor)')
+        st.pyplot(fig)
+        
+if page == pages[6]:
     st.header("Test du modèle")
     st.subheader("Nous allons essayer de prédire les ventes du jeu suivant :")
 
