@@ -381,7 +381,7 @@ def main():
                 choices_cat =st.sidebar.radio("Choisissez les variables catégorielles à étudier", 
                                             df_clean.select_dtypes(include=['object']).columns)
                 fig3=plt.figure()
-                df_clean.select_dtypes(include=['object'])[choices_cat].value_counts().plot.pie(autopct=lambda x: f'{str(round(x, 2))}%')
+                df_clean.select_dtypes(include=['object'])[choices_cat].value_counts().head(15).plot.pie(autopct=lambda x: f'{str(round(x, 2))}%')
                 plt.title(f'Répartition de la variable {str(choices_cat)}')
                 st.pyplot(fig3)
 
