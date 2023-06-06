@@ -1,8 +1,7 @@
 python
 streamlit
 pandas
-matplotlib
-matplotlib.pyplot
+matplotlib == 3.7.1
 seaborn
 numpy
 tpot
