@@ -922,7 +922,7 @@ def main():
             st.write("Le jeu Hogwarts Legacy devrait se vendre à",round(y_pred[-1],2), "millions d'exemplaires.")
             st.write("Sur Google, nous pouvons observer que le jeu s'est vendu à 15 millions d'exemplaires.")
             st.write("")
-            st.write("Nous pouvons donc nous interroger sur les performances de ce modèlequi ne semble pas des plus efficaces.")
+            st.write("Nous pouvons donc nous interroger sur les performances de ce modèle qui ne semble pas des plus efficaces.")
     
     else:
         st.error("Mot de passe incorrect")
