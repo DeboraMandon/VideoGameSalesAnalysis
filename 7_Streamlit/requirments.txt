@@ -2,6 +2,7 @@ python
 streamlit
 pandas
 matplotlib
+matplotlib.pyplot
 seaborn
 numpy
 tpot
