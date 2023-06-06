@@ -1,9 +1,14 @@
+streamlit
 pandas
-numpy
+matplotlib
 seaborn
-matplotlib.pyplot
-sklearn
+numpy
 tpot
+sklearn
+matplotlib
 re
 joblib
 scikitplot
+shap
+IPython.display
+openpyxl
