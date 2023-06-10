@@ -65,7 +65,7 @@ data_n = {
 df_new_data = pd.DataFrame(data_n)
 
 # liste des onglets
-pages=['📖 Présentation du projet', '🗃️ Dataframe', '📈 Data Visualisation', 
+pages=['📖 Présentation du projet', '🗃️ Dataframe', '📈 Data Visualisation', '📊 PowerBI Rapport', 
     '🛠️ Hyperparamètres', '🚀 Modélisation', '💡 Interprétabilité des modèles', '🪄 Test du modèle']
 # liste des modèles de ML
 models= ["Regression Linéaire", "KNN", "Random forest", 'Lasso', 
@@ -338,8 +338,13 @@ def main():
             st.header("Le Dataframe final")    
             st.write("Shape du nouveau Dataframe.v2 : ", df_clean.shape)
             st.write("Nom des colonnes :",df_clean.columns.to_list())
-            st.write("Description du Dataframe.v2 :",df_clean.describe(), df_clean.describe(include='object'))    
-
+            st.write("Description du Dataframe.v2 :",df_clean.describe(), df_clean.describe(include='object')) 
+            st.markdown("https://app.powerbi.com/groups/me/reports/6336e870-43dd-476a-b285-a4456b285cac/ReportSection71f55ee0677c00e11175?bookmarkGuid=b3cb0fe6-44d4-4e65-a793-f1888011af46&bookmarkUsage=1&ctid=48f2d645-8d8d-4cf0-80ba-3a0ed2d645c0&portalSessionId=40616c31-170d-4e97-b6f9-d8e041a757be&fromEntryPoint=export")   
+            iframe_html = """ 
+            <iframe title="Video_Games_Sales_Analysis - Analyse des ventes" width="1140" height="541.25" src="https://app.powerbi.com/reportEmbed?reportId=6336e870-43dd-476a-b285-a4456b285cac&autoAuth=true&ctid=48f2d645-8d8d-4cf0-80ba-3a0ed2d645c0" frameborder="0" allowFullScreen="true"></iframe>
+            """
+            iframe_html = iframe_html.replace("URL_DU_FICHIER", "https://app.powerbi.com/reportEmbed?reportId=6336e870-43dd-476a-b285-a4456b285cac&autoAuth=true&ctid=48f2d645-8d8d-4cf0-80ba-3a0ed2d645c0")
+            st.markdown(iframe_html, unsafe_allow_html=True)
 
         # PAGE 3 : data visualisation à l'aide de différents graphes
 
@@ -398,19 +403,32 @@ def main():
                 sns.heatmap(df_clean.select_dtypes(include=['int64', 'float64']).corr(),annot=False)   
                 st.pyplot(fig6)
 
+        # PAGE 4 : présentation PowerBI
 
-        # PAGE 4 : présentation des meilleurs hyperparamètres de chaque modèle
-            
         if page == pages[3]:
+            st.header("Rapport PowerBI")    
+            iframe_html = """ 
+            <iframe title="Video_Games_Sales_Analysis - Analyse des ventes" width="1140" height="541.25" src="https://app.powerbi.com/reportEmbed?reportId=6336e870-43dd-476a-b285-a4456b285cac&autoAuth=true&ctid=48f2d645-8d8d-4cf0-80ba-3a0ed2d645c0" frameborder="0" allowFullScreen="true"></iframe>
+            """
+            iframe_html = iframe_html.replace("URL_DU_FICHIER", "https://app.powerbi.com/reportEmbed?reportId=6336e870-43dd-476a-b285-a4456b285cac&autoAuth=true&ctid=48f2d645-8d8d-4cf0-80ba-3a0ed2d645c0")
+            st.markdown(iframe_html, unsafe_allow_html=True)
+            st.markdown("")
+            st.markdown("")
+            st.markdown("")
+            st.markdown("https://app.powerbi.com/groups/me/reports/6336e870-43dd-476a-b285-a4456b285cac/ReportSection71f55ee0677c00e11175?bookmarkGuid=b3cb0fe6-44d4-4e65-a793-f1888011af46&bookmarkUsage=1&ctid=48f2d645-8d8d-4cf0-80ba-3a0ed2d645c0&portalSessionId=40616c31-170d-4e97-b6f9-d8e041a757be&fromEntryPoint=export")   
+
+        # PAGE 5 : présentation des meilleurs hyperparamètres de chaque modèle
+            
+        if page == pages[4]:
             st.sidebar.header("Choix des paramètres pour le modèle")
             st.header("Choix des paramètres pour le modèle")
             model = st.sidebar.selectbox("Recherche des meilleurs paramètres", models)
             st.write("Meilleurs hyperparamètres :", get_param(model))
 
 
-        # PAGE 5 : entraînement des modèles et test des paramètres
+        # PAGE 6 : entraînement des modèles et test des paramètres
 
-        if page == pages[4]:
+        if page == pages[5]:
             st.header("Entrainement des modèles")
             st.sidebar.header("Entrainement des modèles")
             model = st.sidebar.selectbox("Choisissez votre classificateur", models)
@@ -695,10 +713,10 @@ def main():
                     plot_perf(graphe_perf)
 
 
-        # PAGE 6 : présentation de l'interprétabilité du modèle grâce à la 
+        # PAGE 7 : présentation de l'interprétabilité du modèle grâce à la 
         # visualisation des variables les plus exploitées pour cahque modèle
         
-        if page == pages[5]:
+        if page == pages[6]:
             st.header("Interprétabilité du modèle")
             model = st.selectbox("Choisissez votre modèle", models)
             
@@ -908,9 +926,9 @@ def main():
                 plt.title('Top 15 Feature Importances (AdaBoostRegressor)')
                 st.pyplot(fig)
 
-        # PAGE 7 : Test du modèle avec les données du dataframe créé pour tester le modèle
+        # PAGE 8 : Test du modèle avec les données du dataframe créé pour tester le modèle
                 
-        if page == pages[6]:
+        if page == pages[7]:
             st.header("Test du modèle")
             st.subheader("Nous allons essayer de prédire les ventes du jeu suivant :")
 
