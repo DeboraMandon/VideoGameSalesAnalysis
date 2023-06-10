@@ -298,7 +298,6 @@ def main():
             st.markdown("")
             st.markdown("Données : Le dataset fourni est consultable [ici](https://www.kaggle.com/gregorut/videogamesales).")
             st.markdown("Les autres descripteurs ont été récupérés via du web scraping à l’aide de la libraire Selenium.")
-            #st.image("https://app.powerbi.com/reportEmbed?reportId=6336e870-43dd-476a-b285-a4456b285cac&autoAuth=true&ctid=48f2d645-8d8d-4cf0-80ba-3a0ed2d645c0")
 
         # PAGE 2 : présentation des données, explication du jeu de donnée
 
