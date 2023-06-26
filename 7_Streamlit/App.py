@@ -47,21 +47,21 @@ df, df_clean, df_gd = load_data()
 
 # créer le dataframe avec des nouvelles données pour tester le modèle
 data_n = {
-    "Platform": ["Xbox Series"],
-    "Year": [2023],
-    "Genre": ["Action"],
-    "Publisher": ["Warner Bros Games"],
-    "Meta_NP": [14],
-    "Meta_VP": [43],
-    "Meta_NUsers": [130],
-    "Meta_VUsers": [2.3],
-    "test_note_JVC": [18],
-    "avis_count_JVC": [61],
-    "avis_note_JVC": [15.3],
-    "Classification_Age_JVC": [8],
-    "Support_JVC": ["DVD"],
-    "langue_parlée_JVC": ["français"],
-    "texte_JVC": ["français"]}
+    "Platform": ["Xbox Series","PC", "PS5", "ONE", "Switch"],
+    "Year": [2023, 2021, 2021, 2021, 2020],
+    "Genre": ["Action", "Survival-Horror", "Action", "Action", "Aventure"],
+    "Publisher": ["Warner Bros Games", "Capcom", "Sony Interactive Entertainment", "IO Interactive", "Nintendo"],
+    "Meta_NP": [14, 24, 127, 33, 111],
+    "Meta_VP": [43, 83, 88, 87, 90],
+    "Meta_NUsers": [130, 1284, 2491, 234, 6594],
+    "Meta_VUsers": [2.3, 6.9, 8.5, 8.3, 5.6],
+    "test_note_JVC": [18, 16, 18, 17, 17],
+    "avis_count_JVC": [61, 39, 219, 16, 425],
+    "avis_note_JVC": [15.3, 16.2, 16.9, 16.4, 14],
+    "Classification_Age_JVC": [8, 18, 8, 18, 3],
+    "Support_JVC": ["DVD", "DVD", "Blu-ray", "Blu-ray", "cartouche"],
+    "langue_parlée_JVC": ["français", "anglais", "français", "anglais", "français"],
+    "texte_JVC": ["français", "français", "français", "français", "français"]}
 df_new_data = pd.DataFrame(data_n)
 
 # liste des onglets
@@ -309,7 +309,7 @@ def main():
             
             st.header("Analyse du Dataframe")
             st.markdown("")
-            st.markdown("Notre dataset de base est composée de 16598 lignes et 10 colonnes. \n"
+            st.markdown("Notre dataset initial était composée de 16598 lignes et 10 colonnes. \n"
                         "Il comprend les variables suivantes : \n"
                         "- 0 Name - object(string) \n"
                         "- 1 Platform - object(string) \n"
@@ -338,13 +338,7 @@ def main():
             st.header("Le Dataframe final")    
             st.write("Shape du nouveau Dataframe.v2 : ", df_clean.shape)
             st.write("Nom des colonnes :",df_clean.columns.to_list())
-            st.write("Description du Dataframe.v2 :",df_clean.describe(), df_clean.describe(include='object')) 
-            st.markdown("https://app.powerbi.com/groups/me/reports/6336e870-43dd-476a-b285-a4456b285cac/ReportSection71f55ee0677c00e11175?bookmarkGuid=b3cb0fe6-44d4-4e65-a793-f1888011af46&bookmarkUsage=1&ctid=48f2d645-8d8d-4cf0-80ba-3a0ed2d645c0&portalSessionId=40616c31-170d-4e97-b6f9-d8e041a757be&fromEntryPoint=export")   
-            iframe_html = """ 
-            <iframe title="Video_Games_Sales_Analysis - Analyse des ventes" width="1140" height="541.25" src="https://app.powerbi.com/reportEmbed?reportId=6336e870-43dd-476a-b285-a4456b285cac&autoAuth=true&ctid=48f2d645-8d8d-4cf0-80ba-3a0ed2d645c0" frameborder="0" allowFullScreen="true"></iframe>
-            """
-            iframe_html = iframe_html.replace("URL_DU_FICHIER", "https://app.powerbi.com/reportEmbed?reportId=6336e870-43dd-476a-b285-a4456b285cac&autoAuth=true&ctid=48f2d645-8d8d-4cf0-80ba-3a0ed2d645c0")
-            st.markdown(iframe_html, unsafe_allow_html=True)
+            st.write("Description du Dataframe.v2 :",df_clean.describe(), df_clean.describe(include='object'))  
 
         # PAGE 3 : data visualisation à l'aide de différents graphes
 
@@ -937,11 +931,41 @@ def main():
             new_X_test=st.experimental_data_editor(X_test, num_rows='dynamic') 
             rf = load('rf.joblib')
             y_pred=rf.predict(X_test)
-            st.write("Le jeu Hogwarts Legacy devrait se vendre à",round(y_pred[-1],2), "millions d'exemplaires.")
+            
+            st.subheader("Hogwarts Legacy")
+            st.write("Le jeu Hogwarts Legacy devrait se vendre à",round(y_pred[-5],1)*100, "millions d'exemplaires.")
             st.write("Sur Google, nous pouvons observer que le jeu s'est vendu à 15 millions d'exemplaires.")
             st.write("")
-            st.write("Nous pouvons donc nous interroger sur les performances de ce modèle qui ne semble pas des plus efficaces.")
-    
+            st.write("Notre modèle a surévalué les ventes de ce jeu.")
+
+            st.subheader("It Takes Two")
+            st.write("Notre prédiction nous indique un total de ",round(y_pred[-4],1)*100, "millions d'exemplaires vendus.")
+            st.write("Sur Google, nous pouvons observer que le jeu s'est vendu à 10 millions d'exemplaires.")
+            st.write("")
+            st.write("Notre prédiction est assez efficace.") 
+            
+            st.subheader("Resident Evil: Village")
+            st.write("Ce jeu devrait se vendre à",round(y_pred[-3],1)*100, "millions d'exemplaires.")
+            st.write("Sur Google, nous pouvons observer que le jeu s'est vendu à 8 millions d'exemplaires.")
+            st.write("")
+            st.write("Notre modèle a surévalué les ventes de ce jeu.")   
+
+            st.subheader("Hitman 2")
+            st.write("Le jeu ... devrait se vendre à",round(y_pred[-2],1)*100, "millions d'exemplaires.")
+            st.write("Sur Google, nous pouvons observer que le jeu s'est vendu à 8 millions d'exemplaires.")
+            st.write("")
+            st.write("Notre prédiction est assez efficace.") 
+            
+            st.subheader("Animal Crossing : New Horizons")
+            st.write("Le jeu ... devrait se vendre à",round(y_pred[-1],1)*100, "millions d'exemplaires.")
+            st.write("Sur Google, nous pouvons observer que le jeu s'est vendu à 32.63 millions d'exemplaires.")
+            st.write("")
+            st.write("Notre modèle a surévalué les ventes de ce jeu.") 
+            
+            st.header("CONCLUSION")
+            st.write("")
+            st.write("En conclusion, le modèle a tendance a surévaluer les ventes. Toutefois il arrive a tendre vers des prédictions plutôt efficace dans un cas sur 2.")            
+                         
     else:
         st.error("Mot de passe incorrect")
  
