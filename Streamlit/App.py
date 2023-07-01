@@ -32,7 +32,7 @@ import joblib
 from joblib import dump, load
 #import scikitplot as skplt
 import shap
-from IPython.display import display
+#from IPython.display import display
 import configparser
 
 # télécharger les données puis les conserver en cache
