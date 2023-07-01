@@ -8,3 +8,4 @@ scikit-learn
 joblib
 shap
 openpyxl
+pip == 23.1.2
