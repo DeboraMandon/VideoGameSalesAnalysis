@@ -4,7 +4,7 @@ seaborn
 numpy<1.24
 tpot
 scikit-learn
-sklearn
+#sklearn
 joblib
 shap
 openpyxl
