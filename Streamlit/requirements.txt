@@ -1,7 +1,7 @@
 pandas
 matplotlib
 seaborn
-numpy<1.24
+numpy<1.23.9
 tpot
 scikit-learn
 #sklearn
