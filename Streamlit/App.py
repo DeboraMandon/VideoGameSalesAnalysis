@@ -284,7 +284,7 @@ def main():
             st.image('image-jeux-video.jpg', use_column_width=1)
             st.title("Video Games Sales Analysis")
             st.header("Machine Learning Project")
-            st.subheader("Auteur : Débora Mandon, Guillaume Besançon, Severine Huang")
+            st.subheader("Auteurs : Débora Mandon, Guillaume Besançon, Severine Huang")
             st.markdown("Pour ce projet il faudra estimer les ventes totales d’un jeu vidéo à l’aide d’informations descriptives comme: \n"
                         "- Le pays d’origine \n"
                         "- Le studio l’ayant développé  \n"
@@ -335,10 +335,10 @@ def main():
                         "qui n'apportent aucune information... Nous avons également utilisé des méthode de Text Mining \n"
                         "pour extraire les informations utiles des chaînes de caractères scrppés sur Internet.")
             st.markdown("")
-            st.header("Le Dataframe final")    
-            st.write("Shape du nouveau Dataframe.v2 : ", df_clean.shape)
+            st.header("Le Dataframe utilisé pour l'entraînement du modèle")    
+            st.write("Shape du nouveau Dataframe : ", df_clean.shape)
             st.write("Nom des colonnes :",df_clean.columns.to_list())
-            st.write("Description du Dataframe.v2 :",df_clean.describe(), df_clean.describe(include='object'))  
+            st.write("Description du Dataframe :",df_clean.describe(), df_clean.describe(include='object'))  
 
         # PAGE 3 : data visualisation à l'aide de différents graphes
 
@@ -924,11 +924,11 @@ def main():
                 
         if page == pages[7]:
             st.header("Test du modèle")
-            st.subheader("Nous allons essayer de prédire les ventes du jeu suivant :")
+            st.subheader("Nous allons maintenant prédire les ventes des jeux suivants :")
 
             edited_df=st.experimental_data_editor(df_new_data, num_rows='dynamic') 
-            st.markdown("Appliquez mon modèle de ML à ces nouvelles données:")
-            new_X_test=st.experimental_data_editor(X_test, num_rows='dynamic') 
+            #st.markdown("Appliquez mon modèle de ML à ces nouvelles données:")
+            #new_X_test=st.experimental_data_editor(X_test, num_rows='dynamic') 
             rf = load('rf.joblib')
             y_pred=rf.predict(X_test)
             
