@@ -34,6 +34,7 @@ from joblib import dump, load
 import shap
 #from IPython.display import display
 import configparser
+import getpass
 
 # télécharger les données puis les conserver en cache
 @st.cache_data
@@ -63,6 +64,9 @@ data_n = {
     "langue_parlée_JVC": ["français", "anglais", "français", "anglais", "français"],
     "texte_JVC": ["français", "français", "français", "français", "français"]}
 df_new_data = pd.DataFrame(data_n)
+
+# utilisateurs
+username = getpass.getuser()
 
 # liste des onglets
 pages=['📖 Présentation du projet', '🗃️ Dataframe', '📈 Data Visualisation', '📊 PowerBI Rapport', 
@@ -115,8 +119,8 @@ def main():
         def get_param(model):
             if model == models[0]:
                 # récupère les meilleurs paramètres et les scores qui ont été enregistré sur le notebook jupyter param_joblib_pipe
-                best_params_lr = load('best_params_lr2.joblib') 
-                best_score = load('best_score_lr2.joblib')
+                best_params_lr = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_lr2.joblib') 
+                best_score = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_score_lr2.joblib')
                 best_model=LinearRegression(**best_params_lr)
                 best_model.fit(X_train, y_train)
                 y_pred = best_model.predict(X_test)
@@ -131,8 +135,8 @@ def main():
                 return("Paramètres:", best_params_lr, "Score:", score, "MSE", mse)
 
             if model == models[1]:
-                best_params_knn = load('best_params_knn2.joblib') 
-                best_score = load('best_score_knn2.joblib')
+                best_params_knn = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_knn2.joblib') 
+                best_score = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_score_knn2.joblib')
                 best_model=KNeighborsRegressor(**best_params_knn)
                 best_model.fit(X_train, y_train)
                 y_pred = best_model.predict(X_test)
@@ -147,8 +151,8 @@ def main():
                 return("Paramètres:", best_params_knn, "Score:", score, "MSE", mse)
                     
             if model == models[2]:
-                best_params_rf = load('best_params_rf2.joblib') 
-                best_score = load('best_score_rf2.joblib')
+                best_params_rf = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_rf2.joblib') 
+                best_score = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_score_rf2.joblib')
                 best_model=RandomForestRegressor(**best_params_rf)
                 best_model.fit(X_train, y_train)
                 y_pred = best_model.predict(X_test)
@@ -163,8 +167,8 @@ def main():
                 return("Paramètres:", best_params_rf, "Score:", score, "MSE", mse)
             
             if model == models[3]:
-                best_params_lass = load('best_params_lass2.joblib') 
-                best_score = load('best_score_lass2.joblib')
+                best_params_lass = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_lass2.joblib') 
+                best_score = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_score_lass2.joblib')
                 best_model=Lasso(**best_params_lass)
                 best_model.fit(X_train, y_train)
                 y_pred = best_model.predict(X_test)
@@ -179,8 +183,8 @@ def main():
                 return("Paramètres:", best_params_lass, "Score:", score, "MSE", mse)
             
             if model == models[4]:
-                best_params_line = load('best_params_line2.joblib') 
-                best_score = load('best_score_line2.joblib')
+                best_params_line = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_line2.joblib') 
+                best_score = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_score_line2.joblib')
                 best_model=LinearSVR(**best_params_line)
                 best_model.fit(X_train, y_train)
                 y_pred = best_model.predict(X_test)
@@ -195,8 +199,8 @@ def main():
                 return("Paramètres:", best_params_line, "Score:", score, "MSE", mse)
             
             if model == models[5]:
-                best_params_lasso_cv = load('best_params_lasso_cv2.joblib') 
-                best_score = load('best_score_lasso_cv2.joblib')
+                best_params_lasso_cv = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_lasso_cv2.joblib') 
+                best_score = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_score_lasso_cv2.joblib')
                 best_model=LassoLarsCV(**best_params_lasso_cv)
                 best_model.fit(X_train, y_train)
                 y_pred = best_model.predict(X_test)
@@ -211,8 +215,8 @@ def main():
                 return("Paramètres:", best_params_lasso_cv, "Score:", score, "MSE", mse)
 
             if model == models[6]:
-                best_params_svr = load('best_params_svr2.joblib') 
-                best_score = load('best_score_svr2.joblib')
+                best_params_svr = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_svr2.joblib') 
+                best_score = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_score_svr2.joblib')
                 best_model=SVR(**best_params_svr)
                 best_model.fit(X_train, y_train)
                 y_pred = best_model.predict(X_test)
@@ -227,8 +231,8 @@ def main():
                 return("Paramètres:", best_params_svr, "Score:", score, "MSE", mse)
             
             if model == models[7]:
-                best_params_dt = load('best_params_dt2.joblib') 
-                best_score = load('best_score_dt2.joblib')
+                best_params_dt = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_dt2.joblib') 
+                best_score = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_score_dt2.joblib')
                 best_model=DecisionTreeRegressor(**best_params_dt)
                 best_model.fit(X_train, y_train)
                 y_pred = best_model.predict(X_test)
@@ -243,8 +247,8 @@ def main():
                 return("Paramètres:", best_params_dt, "Score:", score, "MSE", mse)
             
             if model == models[8]:
-                best_params_ab = load('best_params_ab2.joblib') 
-                best_score = load('best_score_ab2.joblib')
+                best_params_ab = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_ab2.joblib') 
+                best_score = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_score_ab2.joblib')
                 best_model=AdaBoostRegressor(**best_params_ab)
                 best_model.fit(X_train, y_train)
                 y_pred = best_model.predict(X_test)
@@ -431,7 +435,7 @@ def main():
                 num_intercept=st.sidebar.radio("Réglage fit_intercept :", [True, False])
                 graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
                 st.subheader('Réglage des paramètres')
-                best_params = load('best_params_lr2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_lr2.joblib')
                 st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
                 if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
 
@@ -464,7 +468,7 @@ def main():
                 num_weights=st.sidebar.radio("Choisissez une fonction de pondération, weights :", ['uniform', 'distance'], index=1)
                 graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
                 st.subheader('Réglage des paramètres')
-                best_params = load('best_params_knn2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_knn2.joblib')
                 st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
                 if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
                     pipeline = make_pipeline(
@@ -495,7 +499,7 @@ def main():
                 num_max_features=st.sidebar.radio("Choisissez le nombre de caractéristiques à considérer lors de la recherche de la meilleure division, max_features :", ['sqrt', 'log2', 'auto', None], index=2)
                 graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
                 st.subheader('Réglage des paramètres')
-                best_params = load('best_params_rf2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_rf2.joblib')
                 st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
                 if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
                     pipeline = make_pipeline(
@@ -529,7 +533,7 @@ def main():
                 num_selection=st.sidebar.radio("Choisissez la méthode utilisée pour sélectionner les variables dans le modèle :", ['random', 'cyclic'])
                 graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
                 st.subheader('Réglage des paramètres')
-                best_params = load('best_params_lass2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_lass2.joblib')
                 st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
                 if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
                     pipeline = make_pipeline(
@@ -563,7 +567,7 @@ def main():
                 num_max_iter=st.sidebar.slider("Choisissez le nombre maximum d'itérations effectuées :", 0, 1000, 1000)
                 graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
                 st.subheader('Réglage des paramètres')
-                best_params = load('best_params_line2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_line2.joblib')
                 st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
                 if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
                     pipeline = make_pipeline(
@@ -596,7 +600,7 @@ def main():
                 num_verbose=st.sidebar.radio("Choisissez la verbose :", [True, False], index=1)
                 graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
                 st.subheader('Réglage des paramètres')
-                best_params = load('best_params_lasso_cv2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_lasso_cv2.joblib')
                 st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
                 if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
                     pipeline = make_pipeline(
@@ -626,7 +630,7 @@ def main():
                 num_kernel=st.sidebar.radio("Choisissez le kernel :", ['linear', 'poly', 'rbf', 'sigmoid']) 
                 graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
                 st.subheader('Réglage des paramètres')
-                best_params = load('best_params_svr2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_svr2.joblib')
                 st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
                 if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
 
@@ -655,7 +659,7 @@ def main():
                 num_sample_split=st.sidebar.number_input("Choisissez min_sample_split :", 0, 10, 2)
                 graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
                 st.subheader('Réglage des paramètres')
-                best_params = load('best_params_dt2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_dt2.joblib')
                 st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
                 if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
                     pipeline = make_pipeline(
@@ -684,7 +688,7 @@ def main():
                 num_n_estimators=st.sidebar.number_input("Choisissez n_estimators :", 0, 100, 50)
                 graphe_perf=st.sidebar.selectbox("Choisissez un graphique de performance du modèle ML :", graphes)
                 st.subheader('Réglage des paramètres')
-                best_params = load('best_params_ab2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_ab2.joblib')
                 st.write('Rappel des meilleurs hyperparamètres de la GridSearchCV pour le modèle:', best_params)
                 if st.button('Execution du modèle avec les réglages sélectionnés', key="classify"):
                     pipeline = make_pipeline(
@@ -715,7 +719,7 @@ def main():
             model = st.selectbox("Choisissez votre modèle", models)
             
             if model == models[0]:
-                best_params = load('best_params_lr2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_lr2.joblib')
                 pipeline = make_pipeline(
                     StandardScaler(),
                     SelectFwe(alpha=0.009000000000000001),
@@ -738,7 +742,7 @@ def main():
                 st.pyplot(fig)
 
             if model == models[1]:
-                best_params = load('best_params_knn2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_knn2.joblib')
                 pipeline = make_pipeline(
                     StandardScaler(),
                     SelectFwe(alpha=0.009000000000000001),
@@ -750,8 +754,8 @@ def main():
                 knn=KNeighborsRegressor(**best_params)
                 knn.fit(X_train, y_train)
                 st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
-                sorted_importances=load("sorted_importances_knn.joblib")
-                sorted_feature_names=load("sorted_feature_names_knn.joblib")
+                sorted_importances=load("C:/Users/'+username+'/Documents/Projet_DA/Streamlit/shap/sorted_importances_knn.joblib")
+                sorted_feature_names=load("C:/Users/'+username+'/Documents/Projet_DA/Streamlit/shap/sorted_feature_names_knn.joblib")
                 top_feature_names = sorted_feature_names[:15]
                 top_importances = sorted_importances[:15]
                 fig=plt.figure(figsize=(10, 6))
@@ -762,7 +766,7 @@ def main():
                 st.pyplot(fig)
                 
             if model == models[2]:
-                best_params = load('best_params_rf2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_rf2.joblib')
                 pipeline = make_pipeline(
                     StandardScaler(),
                     SelectFwe(alpha=0.009000000000000001),
@@ -771,10 +775,11 @@ def main():
                                                                     min_samples_split=7, n_estimators=100)),
                     VarianceThreshold(threshold=0.1))
                 pipeline.fit(X_train, y_train)
+                st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
                 rf=RandomForestRegressor(**best_params)
                 rf.fit(X_train, y_train)
                 explainer = shap.TreeExplainer(rf)
-                shap_values = load('shap_values_rf.joblib')
+                shap_values = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/shap/shap_values_rf.joblib')
                 st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
                 st.set_option('deprecation.showPyplotGlobalUse', False)
                 st.pyplot(shap.summary_plot(shap_values, X_test, plot_type="bar"))
@@ -782,7 +787,7 @@ def main():
                 st.pyplot(shap.summary_plot(shap_values, X_test))
                         
             if model == models[3]:
-                best_params = load('best_params_lass2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_lass2.joblib')
                 pipeline = make_pipeline(
                     StandardScaler(),
                     SelectFwe(alpha=0.009000000000000001),
@@ -794,6 +799,7 @@ def main():
                 pipeline.fit(X_train, y_train)
                 lass=Lasso(**best_params)
                 lass.fit(X_train, y_train)
+                st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
                 coefficients = pd.Series(lass.coef_, index=X_train.columns)
                 top_15_features = coefficients.abs().nlargest(15) 
                 fig=plt.figure(figsize=(10, 6))
@@ -804,7 +810,7 @@ def main():
                 st.pyplot(fig)    
                     
             if model == models[4]:
-                best_params = load('best_params_line2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_line2.joblib')
                 pipeline = make_pipeline(
                     StandardScaler(),
                     SelectFwe(alpha=0.009000000000000001),
@@ -828,7 +834,7 @@ def main():
                 st.pyplot(fig)    
                 
             if model == models[5]:
-                best_params = load('best_params_lasso_cv2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_lasso_cv2.joblib')
                 pipeline = make_pipeline(
                     StandardScaler(),
                     SelectFwe(alpha=0.009000000000000001),
@@ -839,6 +845,7 @@ def main():
                 pipeline.fit(X_train, y_train)
                 lassCV=LassoLarsCV(**best_params)
                 lassCV.fit(X_train, y_train)
+                st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
                 coefficients = pd.Series(lassCV.coef_, index=X_train.columns)
                 top_15_features = coefficients.abs().nlargest(15) 
                 fig=plt.figure(figsize=(10, 6))
@@ -849,7 +856,7 @@ def main():
                 st.pyplot(fig) 
                 
             if model == models[6]:
-                best_params = load('best_params_svr2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_svr2.joblib')
                 pipeline = make_pipeline(
                     StandardScaler(),
                     SelectFwe(alpha=0.009000000000000001),
@@ -861,8 +868,8 @@ def main():
                 svr=SVR(**best_params)
                 svr.fit(X_train, y_train)
                 st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
-                sorted_importances=load("sorted_importances_svr.joblib")
-                sorted_feature_names=load("sorted_feature_names_svr.joblib")
+                sorted_importances=load("C:/Users/"+username+"/Documents/Projet_DA/Streamlit/shap/sorted_importances_svr.joblib")
+                sorted_feature_names=load("C:/Users/"+username+"/Documents/Projet_DA/Streamlit/shap/sorted_feature_names_svr.joblib")
                 top_feature_names = sorted_feature_names[:15]
                 top_importances = sorted_importances[:15]
                 fig=plt.figure(figsize=(10, 6))
@@ -873,7 +880,7 @@ def main():
                 st.pyplot(fig)
                 
             if model == models[7]:
-                best_params = load('best_params_dt2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_dt2.joblib')
                 pipeline = make_pipeline(
                     StandardScaler(),
                     SelectFwe(alpha=0.009000000000000001),
@@ -885,8 +892,8 @@ def main():
                 dt=DecisionTreeRegressor(**best_params)
                 dt.fit(X_train, y_train)
                 st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
-                sorted_importances=load("sorted_importances_dt.joblib")
-                sorted_feature_names=load("sorted_feature_names_dt.joblib")
+                sorted_importances=load("C:/Users/"+username+"/Documents/Projet_DA/Streamlit/shap/sorted_importances_dt.joblib")
+                sorted_feature_names=load("C:/Users/"+username+"/Documents/Projet_DA/Streamlit/shap/sorted_feature_names_dt.joblib")
                 top_feature_names = sorted_feature_names[:15]
                 top_importances = sorted_importances[:15]
                 fig=plt.figure(figsize=(10, 6))
@@ -897,7 +904,7 @@ def main():
                 st.pyplot(fig)
                 
             if model == models[8]:
-                best_params = load('best_params_ab2.joblib')
+                best_params = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/best_params/best_params_ab2.joblib')
                 pipeline = make_pipeline(
                     StandardScaler(),
                     SelectFwe(alpha=0.009000000000000001),
@@ -909,8 +916,8 @@ def main():
                 ab=AdaBoostRegressor(**best_params)
                 ab.fit(X_train, y_train)
                 st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
-                sorted_importances=load("sorted_importances_ab.joblib")
-                sorted_feature_names=load("sorted_feature_names_ab.joblib")
+                sorted_importances=load("C:/Users/"+username+"/Documents/Projet_DA/Streamlit/shap/sorted_importances_ab.joblib")
+                sorted_feature_names=load("C:/Users/"+username+"/Documents/Projet_DA/Streamlit/shap/sorted_feature_names_ab.joblib")
                 top_feature_names = sorted_feature_names[:15]
                 top_importances = sorted_importances[:15]
                 fig=plt.figure(figsize=(10, 6))
@@ -929,7 +936,7 @@ def main():
             edited_df=st.experimental_data_editor(df_new_data, num_rows='dynamic') 
             #st.markdown("Appliquez mon modèle de ML à ces nouvelles données:")
             #new_X_test=st.experimental_data_editor(X_test, num_rows='dynamic') 
-            rf = load('rf.joblib')
+            rf = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/rf.joblib')
             y_pred=rf.predict(X_test)
             
             st.subheader("Hogwarts Legacy")
