@@ -3,6 +3,7 @@ matplotlib
 seaborn
 numpy<1.24
 tpot
+scikit-learn
 sklearn
 joblib
 shap
