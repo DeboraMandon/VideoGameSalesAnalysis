@@ -1,5 +1,5 @@
 pandas
-matplotlib.pyplot
+matplotlib
 seaborn
 numpy
 tpot
