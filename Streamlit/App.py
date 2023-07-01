@@ -933,7 +933,7 @@ def main():
             st.header("Test du modèle")
             st.subheader("Nous allons maintenant prédire les ventes des jeux suivants :")
 
-            edited_df=st.experimental_data_editor(df_new_data, num_rows='dynamic') 
+            edited_df=st.data_editor(df_new_data, num_rows='dynamic') 
             #st.markdown("Appliquez mon modèle de ML à ces nouvelles données:")
             #new_X_test=st.experimental_data_editor(X_test, num_rows='dynamic') 
             rf = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/rf.joblib')
