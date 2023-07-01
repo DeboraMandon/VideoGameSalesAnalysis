@@ -4,7 +4,6 @@ seaborn
 numpy
 tpot
 sklearn
-re
 joblib
 scikitplot
 shap
