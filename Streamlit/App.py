@@ -36,6 +36,9 @@ import shap
 import configparser
 import getpass
 
+# utilisateurs
+username = getpass.getuser()
+
 # télécharger les données puis les conserver en cache
 @st.cache_data
 def load_data():
@@ -65,8 +68,6 @@ data_n = {
     "texte_JVC": ["français", "français", "français", "français", "français"]}
 df_new_data = pd.DataFrame(data_n)
 
-# utilisateurs
-username = getpass.getuser()
 
 # liste des onglets
 pages=['📖 Présentation du projet', '🗃️ Dataframe', '📈 Data Visualisation', '📊 PowerBI Rapport', 
