@@ -6,5 +6,4 @@ tpot
 sklearn
 joblib
 shap
-IPython.display
 openpyxl
