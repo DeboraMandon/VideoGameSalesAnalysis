@@ -39,9 +39,9 @@ import getpass
 # télécharger les données puis les conserver en cache
 @st.cache_data
 def load_data():
-    df= pd.read_csv("gaming_total_v2.csv")
+    df= pd.read_csv("C:/Users/"+username+"/Documents/Projet_DA/Streamlit/gaming_total_v2.csv")
     df= df.drop('Unnamed: 0', axis=1)
-    df_clean=pd.read_csv("df_clean_v2.csv", index_col=0)
+    df_clean=pd.read_csv("C:/Users/"+username+"/Documents/Projet_DA/Streamlit/df_clean_v2.csv", index_col=0)
     df_gd=pd.get_dummies(df_clean)
     return df, df_clean, df_gd
 df, df_clean, df_gd = load_data()
