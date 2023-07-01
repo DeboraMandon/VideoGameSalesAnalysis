@@ -4,6 +4,7 @@ seaborn
 numpy
 tpot
 sklearn
+scikitplot
 joblib
 shap
 openpyxl
