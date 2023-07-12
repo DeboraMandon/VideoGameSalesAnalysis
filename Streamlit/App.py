@@ -332,7 +332,7 @@ def main():
 
             st.markdown("")
             st.markdown("")
-            st.write("Shape du Dataframe :",df.shape)
+            #st.write("Shape du Dataframe :",df.shape)
             st.write("Description du Dataframe :",df.describe())
             st.markdown("")
             st.markdown("Pour obtenir le jeu de données utilisé pour le Machine Learning, nous avons réalisé une étape \n"
@@ -341,7 +341,7 @@ def main():
                         "pour extraire les informations utiles des chaînes de caractères scrppés sur Internet.")
             st.markdown("")
             st.header("Le Dataframe utilisé pour l'entraînement du modèle")    
-            st.write("Shape du nouveau Dataframe : ", df_clean.shape)
+            #st.write("Shape du nouveau Dataframe : ", df_clean.shape)
             st.write("Nom des colonnes :",df_clean.columns.to_list())
             st.write("Description du Dataframe :",df_clean.describe(), df_clean.describe(include='object'))  
 
@@ -755,8 +755,8 @@ def main():
                 knn=KNeighborsRegressor(**best_params)
                 knn.fit(X_train, y_train)
                 st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
-                sorted_importances=load("C:/Users/'+username+'/Documents/Projet_DA/Streamlit/shap/sorted_importances_knn.joblib")
-                sorted_feature_names=load("C:/Users/'+username+'/Documents/Projet_DA/Streamlit/shap/sorted_feature_names_knn.joblib")
+                sorted_importances=load("C:/Users/"+username+"/Documents/Projet_DA/Streamlit/shap/sorted_importances_knn.joblib")
+                sorted_feature_names=load("C:/Users/"+username+"/Documents/Projet_DA/Streamlit/shap/sorted_feature_names_knn.joblib")
                 top_feature_names = sorted_feature_names[:15]
                 top_importances = sorted_importances[:15]
                 fig=plt.figure(figsize=(10, 6))
