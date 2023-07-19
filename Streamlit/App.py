@@ -51,26 +51,26 @@ df, df_clean, df_gd = load_data()
 
 # créer le dataframe avec des nouvelles données pour tester le modèle
 data_n = {
-    "Platform": ["Xbox Series","PC", "PS5", "ONE", "Switch"],
-    "Year": [2023, 2021, 2021, 2021, 2020],
-    "Genre": ["Action", "Survival-Horror", "Action", "Action", "Aventure"],
-    "Publisher": ["Warner Bros Games", "Capcom", "Sony Interactive Entertainment", "IO Interactive", "Nintendo"],
-    "Meta_NP": [14, 24, 127, 33, 111],
-    "Meta_VP": [43, 83, 88, 87, 90],
-    "Meta_NUsers": [130, 1284, 2491, 234, 6594],
-    "Meta_VUsers": [2.3, 6.9, 8.5, 8.3, 5.6],
-    "test_note_JVC": [18, 16, 18, 17, 17],
-    "avis_count_JVC": [61, 39, 219, 16, 425],
-    "avis_note_JVC": [15.3, 16.2, 16.9, 16.4, 14],
-    "Classification_Age_JVC": [8, 18, 8, 18, 3],
-    "Support_JVC": ["DVD", "DVD", "Blu-ray", "Blu-ray", "cartouche"],
-    "langue_parlée_JVC": ["français", "anglais", "français", "anglais", "français"],
-    "texte_JVC": ["français", "français", "français", "français", "français"]}
+    "Platform": ["Xbox Series","PC", "PS5", "ONE", "Switch", "PC"],
+    "Year": [2023, 2021, 2021, 2021, 2020, 2011],
+    "Genre": ["Action", "Survival-Horror", "Action", "Action", "Aventure","Création"],
+    "Publisher": ["Warner Bros Games", "Capcom", "Sony Interactive Entertainment", "IO Interactive", "Nintendo", "Mojang"],
+    "Meta_NP": [14, 24, 127, 33, 111,33],
+    "Meta_VP": [43, 83, 88, 87, 90,93],
+    "Meta_NUsers": [130, 1284, 2491, 234, 6594,7954],
+    "Meta_VUsers": [2.3, 6.9, 8.5, 8.3, 5.6,8.2],
+    "test_note_JVC": [18, 16, 18, 17, 17,19],
+    "avis_count_JVC": [61, 39, 219, 16, 425,4562],
+    "avis_note_JVC": [15.3, 16.2, 16.9, 16.4, 14,18.5],
+    "Classification_Age_JVC": [8, 18, 8, 18, 3,7],
+    "Support_JVC": ["DVD", "DVD", "Blu-ray", "Blu-ray", "cartouche", "Payant à l'acquisition"],
+    "langue_parlée_JVC": ["français", "anglais", "français", "anglais", "français", "français"],
+    "texte_JVC": ["français", "français", "français", "français", "français", "anglais"]}
 df_new_data = pd.DataFrame(data_n)
 
 
 # liste des onglets
-pages=['📖 Présentation du projet', '🗃️ Dataframe', '📈 Data Visualisation', '📊 PowerBI Rapport', 
+pages=['📖 Présentation du projet', '🗃️ Dataframe - présentation du jeu de données', '📈 Data Visualisation', '📊 PowerBI Rapport', 
     '🛠️ Hyperparamètres', '🚀 Modélisation', '💡 Interprétabilité des modèles', '🪄 Test du modèle']
 # liste des modèles de ML
 models= ["Regression Linéaire", "KNN", "Random forest", 'Lasso', 
@@ -303,17 +303,27 @@ def main():
             st.markdown("")
             st.markdown("Données : Le dataset fourni est consultable [ici](https://www.kaggle.com/gregorut/videogamesales).")
             st.markdown("Les autres descripteurs ont été récupérés via du web scraping à l’aide de la libraire Selenium.")
+            st.markdown("")
+            st.markdown("Exemple de jeu vidéo: Minecraft")
+            st.image("minecraft.jpg")
 
         # PAGE 2 : présentation des données, explication du jeu de donnée
 
         if page == pages[1]:
-            st.sidebar.subheader("Dataframe")
-            if st.sidebar.checkbox("Afficher les données brutes :", False):
-                st.subheader("Jeu de données 'vg_sales' : Echantillon de 100 observations")
-                st.write(df.sample(100))
             
             st.header("Analyse du Dataframe")
             st.markdown("")
+            st.markdown("Le dataset fourni pour le projet provient du site VG CHARTZ.")
+            st.image("vgchartz.png")
+            st.markdown("Echantillon du tableau global du site VG CHARTZ où les données ont été scrappées »")
+
+            st.markdown("")
+            st.subheader("Dataframe")
+            if st.checkbox("Afficher les données brutes :", False):
+                st.subheader("Jeu de données 'vg_sales' : Echantillon de 100 observations")
+                st.write(df.sample(100))
+            
+            st.markdown("")    
             st.markdown("Notre dataset initial était composée de 16598 lignes et 10 colonnes. \n"
                         "Il comprend les variables suivantes : \n"
                         "- 0 Name - object(string) \n"
@@ -326,6 +336,11 @@ def main():
                         "- 7 JP_Sales - float64 \n"
                         "- 8 Other_Sales - float64 \n"
                         "- 9 Global_Sales - float64")            
+            st.markdown("")
+            st.subheader("Le Web scrapping")
+            st.markdown("")
+            st.markdown("Quelques exemples d’informations que l’on a souhaité rajouter : ")
+            st.image('new_var.png')
             st.markdown("")
             st.markdown("Après le Webscrapping, nous avons obtenu les nouvelles variables suivantes : \n")   
             st.write("Nom des colonnes :",df.columns.to_list())
@@ -942,42 +957,49 @@ def main():
             
             st.subheader("Hogwarts Legacy")
             st.image("hogwarts.jpeg")
-            st.write("Notre prédiction de vente s'élève à",round(y_pred[-5],1)*100, "millions d'exemplaires.")
+            st.write("Notre prédiction de vente s'élève à",round(y_pred[-6],1)*100, "millions d'exemplaires.")
             st.write("Le jeu s'est vendu à 15 millions d'exemplaires.")
             st.write("")
             st.write("Notre modèle a surévalué les ventes de ce jeu.")
 
             st.subheader("It Takes Two")
             st.image("it2.jpeg")
-            st.write("Notre prédiction de vente s'élève à ",round(y_pred[-4],1)*100, "millions d'exemplaires.")
+            st.write("Notre prédiction de vente s'élève à ",round(y_pred[-5],1)*100, "millions d'exemplaires.")
             st.write("Le jeu s'est vendu à 10 millions d'exemplaires.")
             st.write("")
             st.write("Notre prédiction est assez efficace.") 
             
             st.subheader("Resident Evil: Village")
             st.image("village.png")
-            st.write("Notre prédiction de vente s'élève à",round(y_pred[-3],1)*100, "millions d'exemplaires.")
+            st.write("Notre prédiction de vente s'élève à",round(y_pred[-4],1)*100, "millions d'exemplaires.")
             st.write("Le jeu s'est vendu à 8 millions d'exemplaires.")
             st.write("")
             st.write("Notre modèle a surévalué les ventes de ce jeu.")   
 
             st.subheader("Hitman 2")
             st.image("hit.jpg")
-            st.write("Notre prédiction de vente s'élève à",round(y_pred[-2],1)*100, "millions d'exemplaires.")
+            st.write("Notre prédiction de vente s'élève à",round(y_pred[-3],1)*100, "millions d'exemplaires.")
             st.write("Le jeu s'est vendu à 8 millions d'exemplaires.")
             st.write("")
             st.write("Notre prédiction est assez efficace.") 
             
             st.subheader("Animal Crossing : New Horizons")
             st.image("ac.jpg")
-            st.write("Notre prédiction de vente s'élève à",round(y_pred[-1],1)*100, "millions d'exemplaires.")
+            st.write("Notre prédiction de vente s'élève à",round(y_pred[-2],1)*100, "millions d'exemplaires.")
             st.write("Le jeu s'est vendu à 32.63 millions d'exemplaires.")
             st.write("")
             st.write("Notre modèle a surévalué les ventes de ce jeu.") 
-            
+
+            st.subheader("Minecraft")
+            st.image("minecraft.jpg")
+            st.write("Notre prédiction de vente s'élève à",round(y_pred[-1],1)*100, "millions d'exemplaires.")
+            st.write("Le jeu s'est vendu à 122 millions d'exemplaires en 2011.")
+            st.write("")
+            st.write("Notre modèle a légèrement sous-évalué les ventes de ce jeu.")       
+            st.markdown("")                  
             st.header("CONCLUSION")
             st.write("")
-            st.write("En conclusion, le modèle a tendance a surévaluer les ventes. Toutefois il reste assez satisfaisant et les tests démontrent tout à fait son score de prédiction de 0.63.")            
+            st.write("En conclusion, le modèle a tendance a surévaluer les ventes. Toutefois il reste assez satisfaisant et les tests démontrent bien son score de prédiction de 0.63.")            
                          
     else:
         st.error("Mot de passe incorrect")
