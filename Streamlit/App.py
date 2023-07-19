@@ -71,7 +71,7 @@ df_new_data = pd.DataFrame(data_n)
 
 # liste des onglets
 pages=['📖 Présentation du projet', '🗃️ Dataframe - présentation du jeu de données', '📈 Data Visualisation', '📊 PowerBI Rapport', 
-    '🛠️ Hyperparamètres', '🚀 Modélisation', '💡 Interprétabilité des modèles', '🪄 Test du modèle']
+    '🛠️ Hyperparamètres', '🚀 Modélisation', '💡 Interprétabilité des modèles', '🪄 Test du modèle', '🎆 Conclusion']
 # liste des modèles de ML
 models= ["Regression Linéaire", "KNN", "Random forest", 'Lasso', 
         'LinearSVR', 'LassoLarsCV', 'SVR', 'DecisionTreeRegressor', 'AdaBoostRegressor']
@@ -1000,7 +1000,35 @@ def main():
             st.header("CONCLUSION")
             st.write("")
             st.write("En conclusion, le modèle a tendance a surévaluer les ventes. Toutefois il reste assez satisfaisant et les tests démontrent bien son score de prédiction de 0.63.")            
-                         
+
+        if page == pages[8]:
+            st.header("Conclusion")
+            st.markdown("")
+            st.markdown("Notre modèle permet d’obtenir une prédiction assez juste sur des jeux videos vendus jusqu’en en 2015 ce qui ne permet pas aujourd’hui une prédiction future mais nous avons identifié les variables et les données manquantes pour améliorer notre modèle afin qu’il obtienne des meilleurs résultats sur les ventes de jeux vidéos actuelles et à venir.")
+            st.markdown("")
+            st.markdown("- La visualisation de notre jeu de données a été réalisée sur PowerBI.")
+            st.markdown("- Création d'un modèle de prédiction pour les ventes de jeux vidéo avec une accuracy de 63%.")
+            st.markdown("- Toutes les étapes sont visualisables depuis cette application Streamlit.")
+            st.markdown("- Projet d’analyse avec une difficulté de 9/10")
+            st.markdown("")
+
+            st.markdown("Jeu de données de base très pauvre: ")
+            st.markdown("- la récupération de données supplémentaires par le webscraping était un passage obligatoire, et cela a nécessité beaucoup de temps, de test et de correction de code.")
+            st.markdown("- Preprocessing des données long et complexe avec les données webscrappées qui n'étaient pas propres, étape nécessaire et cruciale afin que les modèles de ML puissent interpréter correctement nos données.")             
+            st.markdown("")
+            st.markdown("Machine Learning et modéle de régression :")
+            st.markdown("- Beaucoup de modèles testés, recherche des meilleurs hyperparamètres et interprétabilité.")  
+            st.markdown("")
+            st.markdown("Modèle retenu: RandomForestRegressor -> score de 63%.")            
+            st.markdown("- Ce score peut paraître faible mais il faut remettre ce dernier dans son contexte, nous essayons de prédire de manière exacte le nombre de ventes de jeux vidéos, ce qui est compliqué et explique notre résultat.")
+            st.markdown("")
+            st.markdown("Piste d'amélioration: ")
+            st.markdown("- Obtenir plus de données, améliorer leur qualité")
+            st.markdown("- Tester des modèles de classifications (en faisant des regroupements de nombre de ventes)")
+            st.markdown("")
+            st.markdown("")
+            st.markdown("MERCI pour votre attention! 😊")
+                                    
     else:
         st.error("Mot de passe incorrect")
  
