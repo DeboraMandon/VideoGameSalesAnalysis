@@ -315,16 +315,12 @@ def main():
             st.markdown("")
             st.markdown("Le dataset fourni pour le projet provient du site VG CHARTZ.")
             st.image("vgchartz.png")
-            st.markdown("Echantillon du tableau global du site VG CHARTZ où les données ont été scrappées »")
+            st.markdown("Echantillon du tableau global du site VG CHARTZ où les données ont été scrappées")
 
             st.markdown("")
-            st.subheader("Dataframe")
-            if st.checkbox("Afficher les données brutes :", False):
-                st.subheader("Jeu de données 'vg_sales' : Echantillon de 100 observations")
-                st.write(df.sample(100))
             
             st.markdown("")    
-            st.markdown("Notre dataset initial était composée de 16598 lignes et 10 colonnes. \n"
+            st.markdown("Notre dataset initial était composé de 16598 lignes et 10 colonnes. \n"
                         "Il comprend les variables suivantes : \n"
                         "- 0 Name - object(string) \n"
                         "- 1 Platform - object(string) \n"
@@ -346,6 +342,10 @@ def main():
             st.write("Nom des colonnes :",df.columns.to_list())
 
             st.markdown("")
+            st.subheader("Dataframe brut avant PreProcessing")
+            if st.checkbox("Afficher les données brutes :", False):
+                st.subheader("Jeu de données 'vg_sales' : Echantillon de 100 observations")
+                st.write(df.sample(100))
             st.markdown("")
             #st.write("Shape du Dataframe :",df.shape)
             st.write("Description du Dataframe :",df.describe())
