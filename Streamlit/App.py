@@ -796,7 +796,6 @@ def main():
                 rf.fit(X_train, y_train)
                 explainer = shap.TreeExplainer(rf)
                 shap_values = load('C:/Users/'+username+'/Documents/Projet_DA/Streamlit/shap/shap_values_rf.joblib')
-                st.markdown("Voici les variables qui ont le plus d'impact dans les décisions prises par le modèle.")
                 st.set_option('deprecation.showPyplotGlobalUse', False)
                 st.pyplot(shap.summary_plot(shap_values, X_test, plot_type="bar"))
                 
