@@ -1,2 +1,7 @@
-
-Modele_ML/df_encode.csv
+# Ignore les fichiers excel et csv
+*.xlsx
+*.csv
+*.jpg
+*.png
+*.ini
+*.joblib
